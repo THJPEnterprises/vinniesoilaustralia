@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Contact Vinnie's Oil Australia — wholesale enquiries, retailer applications, technical questions and general contact for Vinnie's Oil Australia, distributed by THJP Enterprises Pty Ltd.">
+<title>Contact Us — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.contact-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 0; min-height: 70vh; }
+.contact-sidebar { background: var(--forest); padding: 4rem 3.5rem; color: #fff; }
+.contact-sidebar h2 { color: #fff; margin-bottom: 0.75rem; font-size: clamp(1.4rem, 2.5vw, 2rem); }
+.contact-sidebar h2 em { font-family: var(--font-serif); font-style: italic; color: var(--gold); }
+.contact-sidebar > p { color: rgba(255,255,255,0.6); margin-bottom: 2.5rem; font-size: 0.9rem; line-height: 1.75; }
+.contact-method { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.25rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 0.85rem; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+.contact-method:hover { border-color: var(--gold); background: rgba(255,255,255,0.04); }
+.method-icon { width: 40px; height: 40px; background: rgba(200,131,10,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0; }
+.method-text .m-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sage); margin-bottom: 2px; }
+.method-text .m-value { font-size: 0.88rem; color: #fff; font-weight: 500; }
+.contact-social-row { display: flex; gap: 0.75rem; margin-top: 2rem; }
+.contact-social-row a { width: 38px; height: 38px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); transition: all 0.2s; }
+.contact-social-row a:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.3); }
+.contact-social-row svg { width: 16px; height: 16px; }
+.contact-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 2rem 0; }
+.contact-form-area { padding: 4rem 4rem; background: var(--white); }
+.contact-form-area h2 { color: var(--forest); margin-bottom: 0.5rem; font-size: clamp(1.4rem, 2.5vw, 2rem); }
+.contact-form-area h2 em { font-family: var(--font-serif); font-style: italic; color: var(--pine); }
+.contact-form-area > p { color: var(--grey-600); margin-bottom: 2rem; font-size: 0.9rem; }
+.enquiry-types { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
+.enquiry-type { padding: 0.85rem 1rem; border: 1.5px solid var(--grey-200); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.enquiry-type:hover { border-color: var(--moss); background: var(--offwhite); }
+.enquiry-type.selected { border-color: var(--forest); background: rgba(26,46,35,0.05); }
+.enquiry-type h4 { font-size: 0.82rem; color: var(--forest); margin-bottom: 2px; }
+.enquiry-type p { font-size: 0.72rem; margin: 0; }
+.wholesale-notice { background: var(--offwhite); border: 1px solid var(--grey-200); border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--grey-600); margin-bottom: 1.5rem; }
+.form-success-box { display: none; background: rgba(74,103,65,0.08); border: 1px solid var(--moss); border-radius: 8px; padding: 1.5rem; margin-top: 1rem; align-items: center; gap: 1rem; }
+.form-success-box svg { color: var(--moss); flex-shrink: 0; }
+.form-success-box h3 { font-size: 0.95rem; color: var(--forest); margin-bottom: 0.2rem; }
+.form-success-box p { font-size: 0.82rem; margin: 0; }
+@media (max-width: 900px) { .contact-layout { grid-template-columns: 1fr; } .contact-sidebar { padding: 3rem 2rem; } .contact-form-area { padding: 3rem 2rem; } }
+@media (max-width: 600px) { .enquiry-types { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav id="navbar" role="navigation"><div class="container nav-inner">
+  <a class="nav-logo" href="../index.html"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia logo"><div class="nav-logo-text"><strong>Vinnie's Oil</strong><span>Australia</span></div></a>
+  <ul class="nav-links" role="list">
+    <li><a href="../index.html">Home</a></li><li><a href="story.html">The Story</a></li><li><a href="about.html">About Us</a></li>
+    <li><a href="products.html" class="has-drop">Products</a>
+      <div class="nav-drop"><span class="drop-label">Penetrating Oils &amp; Finishes</span><a href="product-upo.html" class="drop-sub">Ultra Penetrating Oil (UPO)</a><a href="product-upo-rustic.html" class="drop-sub">UPO – Rustic Dark</a><a href="product-eternal-seal.html" class="drop-sub">Eternal Seal</a><a href="product-monocoat.html" class="drop-sub">Universal Monocoat</a><span class="drop-label">Finishing Waxes</span><a href="product-hard-wax.html" class="drop-sub">Hard Wax</a><a href="product-soft-wax.html" class="drop-sub">Soft Wax</a><span class="drop-label">Bundles</span><a href="products.html#bundles" class="drop-sub">Product Bundles</a></div>
+    </li>
+    <li><a href="retail-network.html">Retailers</a></li>
+    <li><a href="resources.html" class="has-drop">Resources</a>
+      <div class="nav-drop"><a href="resources.html#application">Application Instructions</a><a href="resources.html#sds">Safety Data Sheets</a><a href="resources.html#news">News &amp; Media</a><a href="resources.html#dealer">Dealer Information</a></div>
+    </li>
+  </ul>
+  <a href="contact.html" class="nav-cta active"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12L12 1M12 1H6M12 1v6"/></svg>Become a Stockist</a>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div></nav>
+<div id="mobile-nav" class="mobile-nav"><a href="../index.html">Home</a><a href="story.html">The Story</a><a href="about.html">About Us</a><a href="products.html">Products</a><a href="retail-network.html">Retailers</a><a href="resources.html">Resources</a><a href="contact.html">Contact</a></div>
+
+<div class="page-hero" style="padding-bottom:0;">
+  <div class="page-hero-bg" style="background:linear-gradient(135deg,rgba(14,21,18,0.92) 0%,rgba(45,74,56,0.7) 100%);position:absolute;inset:0;"></div>
+  <div class="container page-hero-inner" style="padding-bottom:3rem;">
+    <span class="label">Get in Touch</span>
+    <h1>Contact <em>Vinnie's Oil Australia</em></h1>
+    <p>Retailer applications, wholesale enquiries, technical questions and general contact. We respond to all business enquiries within 2 business days.</p>
+  </div>
+</div>
+
+<div class="contact-layout">
+  <!-- SIDEBAR -->
+  <div class="contact-sidebar">
+    <h2>Let's Talk <em>Business</em></h2>
+    <p>Vinnie's Oil Australia works exclusively with wholesale retail partners. Whether you're applying to become a stockist, asking a technical question, or exploring a distribution opportunity, we'd love to hear from you.</p>
+
+    <a href="mailto:info@vinniesoilaustralia.com" class="contact-method">
+      <div class="method-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="14" height="10" rx="1"/><path d="M2 4l7 6 7-6"/></svg></div>
+      <div class="method-text"><div class="m-label">Email</div><div class="m-value">info@vinniesoilaustralia.com</div></div>
+    </a>
+
+    <a href="http://arborean.com.au" target="_blank" rel="noopener" class="contact-method">
+      <div class="method-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="7"/><path d="M9 2a9 9 0 010 14M2 9h14"/></svg></div>
+      <div class="method-text"><div class="m-label">Website</div><div class="m-value">arborean.com.au</div></div>
+    </a>
+
+    <a href="https://www.instagram.com/vinniesoil_au/" target="_blank" rel="noopener" class="contact-method">
+      <div class="method-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></div>
+      <div class="method-text"><div class="m-label">Instagram</div><div class="m-value">@vinniesoil_au</div></div>
+    </a>
+
+    <a href="https://x.com/VinniesOilAU" target="_blank" rel="noopener" class="contact-method">
+      <div class="method-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
+      <div class="method-text"><div class="m-label">X / Twitter</div><div class="m-value">@VinniesOilAU</div></div>
+    </a>
+
+    <a href="https://www.youtube.com/@VinniesOilAU" target="_blank" rel="noopener" class="contact-method">
+      <div class="method-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.7-.8-2.1-.9C16.6 5 12 5 12 5s-4.6 0-6.9.1c-.4.1-1.3.1-2.1.9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.8C6.8 19 12 19 12 19s4.6 0 6.9-.2c.4-.1 1.3-.1 2.1-.8.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8z"/></svg></div>
+      <div class="method-text"><div class="m-label">YouTube</div><div class="m-value">@VinniesOilAU</div></div>
+    </a>
+
+    <a href="https://www.facebook.com/vinniesoilAU" target="_blank" rel="noopener" class="contact-method">
+      <div class="method-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></div>
+      <div class="method-text"><div class="m-label">Facebook</div><div class="m-value">vinniesoilAU</div></div>
+    </a>
+
+    <hr class="contact-divider">
+
+    <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); line-height:1.7;">
+      <strong style="color:rgba(255,255,255,0.5); display:block; margin-bottom:0.4rem;">Vinnie's Oil Australia</strong>
+      Operated by THJP Enterprises Pty Ltd<br>
+      ABN: 56 696 226 203<br><br>
+      Vinnie's Oil is a registered brand of Vinnie's Oil Europe. Distributed exclusively in Australia by THJP Enterprises Pty Ltd.<br><br>
+      <strong style="color:rgba(255,255,255,0.4);">Wholesale only — not available direct to consumers.</strong>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="contact-form-area">
+    <h2>Send an <em>Enquiry</em></h2>
+    <p>Select the type of enquiry below and fill in the form. We respond to all business enquiries within 2 business days.</p>
+
+    <div class="wholesale-notice">
+      <strong>⚠️ Wholesale only:</strong> Vinnie's Oil Australia is a B2B distributor and does not sell products direct to consumers. This form is for business enquiries only. To find a retailer near you, visit our <a href="retail-network.html" style="color:var(--amber);">retail network page</a>.
+    </div>
+
+    <div class="enquiry-types" id="enquiry-types">
+      <div class="enquiry-type" onclick="selectType(this, 'Retailer Application')">
+        <h4>🏪 Retailer Application</h4>
+        <p>Apply to stock Vinnie's Oil in my business</p>
+      </div>
+      <div class="enquiry-type" onclick="selectType(this, 'Wholesale Order Enquiry')">
+        <h4>📦 Wholesale Order</h4>
+        <p>Existing stockist ordering or supply question</p>
+      </div>
+      <div class="enquiry-type" onclick="selectType(this, 'Technical Question')">
+        <h4>🔬 Technical Question</h4>
+        <p>Application, product or compatibility question</p>
+      </div>
+      <div class="enquiry-type" onclick="selectType(this, 'General Business Enquiry')">
+        <h4>💼 General Enquiry</h4>
+        <p>Partnerships, media or other business enquiry</p>
+      </div>
+    </div>
+
+    <form id="contact-form" novalidate>
+      <input type="hidden" id="enquiry-type-field" name="subject" value="General Enquiry">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="c-name">Full Name *</label>
+          <input type="text" id="c-name" name="name" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="c-business">Business Name *</label>
+          <input type="text" id="c-business" name="business" placeholder="Your business or store name" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="c-email">Email Address *</label>
+          <input type="email" id="c-email" name="email" placeholder="you@yourbusiness.com.au" required>
+        </div>
+        <div class="form-group">
+          <label for="c-phone">Phone Number</label>
+          <input type="tel" id="c-phone" name="phone" placeholder="(03) xxxx xxxx">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="c-state">State / Territory</label>
+        <select id="c-state" name="state">
+          <option value="">Select state…</option>
+          <option>New South Wales</option><option>Victoria</option><option>Queensland</option>
+          <option>Western Australia</option><option>South Australia</option><option>Tasmania</option>
+          <option>ACT</option><option>Northern Territory</option><option>New Zealand</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="c-message">Message *</label>
+        <textarea id="c-message" name="message" placeholder="Tell us about your business and how we can help you…" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Send Enquiry</button>
+      <p class="form-note" style="margin-top:1rem;">By submitting this form you agree to be contacted by Vinnie's Oil Australia regarding your enquiry. We do not share your details with third parties.</p>
+    </form>
+
+    <div id="form-success" class="form-success-box">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2"><circle cx="14" cy="14" r="12"/><path d="M9 14l3.5 3.5L19 10"/></svg>
+      <div>
+        <h3>Enquiry Received — Thank You!</h3>
+        <p>We'll review your message and respond within 2 business days. For urgent matters, email <a href="mailto:info@vinniesoilaustralia.com" style="color:var(--pine);">info@vinniesoilaustralia.com</a> directly.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="footer"><div class="container"><div class="footer-grid">
+  <div class="footer-brand"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia"><p>Authorised national distributor of Vinnie's Oil in Australia. THJP Enterprises Pty Ltd ABN: 56 696 226 203.</p><div class="footer-social"><a href="https://www.instagram.com/vinniesoil_au/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://x.com/VinniesOilAU" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://www.facebook.com/vinniesoilAU" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a></div></div>
+  <div class="footer-col"><h4>Products</h4><ul><li><a href="product-upo.html">Ultra Penetrating Oil</a></li><li><a href="product-upo-rustic.html">UPO Rustic Dark</a></li><li><a href="product-eternal-seal.html">Eternal Seal</a></li><li><a href="product-monocoat.html">Universal Monocoat</a></li><li><a href="product-hard-wax.html">Hard Wax</a></li><li><a href="product-soft-wax.html">Soft Wax</a></li></ul></div>
+  <div class="footer-col"><h4>Company</h4><ul><li><a href="story.html">The Story</a></li><li><a href="about.html">About Us</a></li><li><a href="retail-network.html">Retail Network</a></li></ul></div>
+  <div class="footer-col"><h4>Resources</h4><ul><li><a href="resources.html#application">Application Instructions</a></li><li><a href="resources.html#sds">Safety Data Sheets</a></li><li><a href="resources.html#news">News &amp; Media</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+</div><div class="footer-bottom"><p>© 2026 Vinnie's Oil Australia. Distributed by THJP Enterprises Pty Ltd.</p><p><a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a></p></div></div></footer>
+
+<button id="back-top" aria-label="Back to top"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 12V4M4 8l4-4 4 4"/></svg></button>
+<script src="../js/shared.js"></script>
+<script>
+function selectType(el, type) {
+  document.querySelectorAll('.enquiry-type').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('enquiry-type-field').value = type;
+}
+</script>
+</body></html>

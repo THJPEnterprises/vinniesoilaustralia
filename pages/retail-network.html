@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Find authorised Vinnie's Oil stockists across Australia — woodworking stores, timber specialists and craft shops stocking our premium Swedish wood finishes.">
+<title>Our Retail Network — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.retailer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.5rem; }
+.retailer-card { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 1.75rem; transition: all 0.2s; }
+.retailer-card:hover { box-shadow: 0 8px 32px rgba(14,21,18,0.1); transform: translateY(-3px); }
+.retailer-logo { height: 48px; width: auto; max-width: 160px; object-fit: contain; margin-bottom: 1rem; }
+.retailer-logo-placeholder { height: 48px; display: flex; align-items: center; margin-bottom: 1rem; }
+.retailer-logo-placeholder span { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 700; color: var(--forest); }
+.retailer-card .state-badge { display: inline-block; padding: 3px 10px; background: var(--offwhite); border: 1px solid var(--grey-200); border-radius: 100px; font-size: 0.68rem; font-weight: 700; color: var(--grey-600); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.retailer-card h3 { font-size: 1rem; color: var(--forest); margin-bottom: 0.3rem; }
+.retailer-card p { font-size: 0.8rem; color: var(--grey-600); margin-bottom: 0.75rem; line-height: 1.5; }
+.retailer-card .retailer-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 600; color: var(--pine); text-decoration: none; border-bottom: 1px solid var(--mist); transition: color 0.2s, border-color 0.2s; }
+.retailer-card .retailer-link:hover { color: var(--amber); border-color: var(--amber); }
+.state-filter { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.state-btn { padding: 7px 18px; border: 1.5px solid var(--grey-200); border-radius: 100px; font-size: 0.78rem; font-weight: 600; cursor: pointer; background: #fff; color: var(--grey-600); transition: all 0.2s; }
+.state-btn:hover, .state-btn.active { background: var(--forest); color: #fff; border-color: var(--forest); }
+.apply-section { background: var(--forest); border-radius: 12px; padding: 3rem; color: #fff; }
+.apply-section h2 { color: #fff; margin-bottom: 0.75rem; }
+.apply-section h2 em { font-family: var(--font-serif); font-style: italic; color: var(--gold); }
+.apply-section p { color: rgba(255,255,255,0.65); margin-bottom: 1.5rem; }
+.apply-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.apply-note { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 1rem; }
+.form-group-dark label { color: rgba(255,255,255,0.7); }
+.form-group-dark input, .form-group-dark select, .form-group-dark textarea { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #fff; }
+.form-group-dark input::placeholder, .form-group-dark textarea::placeholder { color: rgba(255,255,255,0.3); }
+.form-group-dark input:focus, .form-group-dark select:focus, .form-group-dark textarea:focus { border-color: var(--gold); }
+.form-group-dark select option { background: var(--forest); color: #fff; }
+.online-retailer { border-left: 3px solid var(--sweden-blue); }
+.coming-soon { border-left: 3px solid var(--grey-200); opacity: 0.6; }
+@media (max-width: 768px) { .retailer-grid { grid-template-columns: 1fr 1fr; } .apply-form-grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .retailer-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav id="navbar" role="navigation"><div class="container nav-inner">
+  <a class="nav-logo" href="../index.html"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia logo"><div class="nav-logo-text"><strong>Vinnie's Oil</strong><span>Australia</span></div></a>
+  <ul class="nav-links" role="list">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="story.html">The Story</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="products.html" class="has-drop">Products</a>
+      <div class="nav-drop">
+        <span class="drop-label">Penetrating Oils &amp; Finishes</span>
+        <a href="product-upo.html" class="drop-sub">Ultra Penetrating Oil (UPO)</a>
+        <a href="product-upo-rustic.html" class="drop-sub">UPO – Rustic Dark</a>
+        <a href="product-eternal-seal.html" class="drop-sub">Eternal Seal</a>
+        <a href="product-monocoat.html" class="drop-sub">Universal Monocoat</a>
+        <span class="drop-label">Finishing Waxes</span>
+        <a href="product-hard-wax.html" class="drop-sub">Hard Wax</a>
+        <a href="product-soft-wax.html" class="drop-sub">Soft Wax</a>
+        <span class="drop-label">Bundles &amp; Accessories</span>
+        <a href="products.html#bundles" class="drop-sub">Product Bundles</a>
+      </div>
+    </li>
+    <li><a href="retail-network.html" class="active">Retailers</a></li>
+    <li><a href="resources.html" class="has-drop">Resources</a>
+      <div class="nav-drop">
+        <a href="resources.html#application">Application Instructions</a>
+        <a href="resources.html#sds">Safety Data Sheets</a>
+        <a href="resources.html#news">News &amp; Media</a>
+        <a href="resources.html#dealer">Dealer Information</a>
+      </div>
+    </li>
+  </ul>
+  <a href="contact.html" class="nav-cta"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12L12 1M12 1H6M12 1v6"/></svg>Become a Stockist</a>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div></nav>
+<div id="mobile-nav" class="mobile-nav"><a href="../index.html">Home</a><a href="story.html">The Story</a><a href="about.html">About Us</a><a href="products.html">Products</a><a href="retail-network.html">Retailers</a><a href="resources.html">Resources</a><a href="contact.html">Contact</a></div>
+
+<div class="page-hero">
+  <div class="page-hero-bg" style="background:linear-gradient(135deg,rgba(14,21,18,0.92) 0%,rgba(45,74,56,0.7) 100%);position:absolute;inset:0;"></div>
+  <div class="container page-hero-inner">
+    <span class="label">Where to Buy</span>
+    <h1>Our <em>Retail Network</em></h1>
+    <p>Vinnie's Oil is available exclusively through our network of authorised specialist retailers across Australia. Find your nearest stockist below.</p>
+  </div>
+</div>
+
+<!-- NOTICE -->
+<div style="background:var(--offwhite); border-bottom:1px solid var(--grey-200); padding:1rem 0;">
+  <div class="container">
+    <div class="alert alert-info" style="margin:0;">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M9 6v3M9 12h0"/></svg>
+      <span><strong>Wholesale distribution only.</strong> Vinnie's Oil Australia does not sell directly to end consumers. All products are available through our authorised retailer network. If you are a business interested in stocking our range, <a href="#apply" style="text-decoration:underline;">apply below</a>.</span>
+    </div>
+  </div>
+</div>
+
+<!-- RETAILERS -->
+<section style="background:var(--white);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">Authorised Stockists</span>
+      <h2>Find Vinnie's Oil <em>Near You</em></h2>
+      <p>Our network of specialist woodworking, timber, craft and flooring retailers stocks the full Vinnie's Oil range. Each stockist is authorised and trained to advise on the right products for your project.</p>
+    </div>
+
+    <div class="state-filter">
+      <button class="state-btn active" onclick="filterState('all', this)">All States</button>
+      <button class="state-btn" onclick="filterState('nsw', this)">NSW</button>
+      <button class="state-btn" onclick="filterState('vic', this)">VIC</button>
+      <button class="state-btn" onclick="filterState('qld', this)">QLD</button>
+      <button class="state-btn" onclick="filterState('wa', this)">WA</button>
+      <button class="state-btn" onclick="filterState('sa', this)">SA</button>
+      <button class="state-btn" onclick="filterState('online', this)">Online</button>
+    </div>
+
+    <div class="retailer-grid" id="retailer-grid">
+
+      <!-- Arborean -->
+      <div class="retailer-card" data-state="nsw">
+        <div class="retailer-logo-placeholder"><span>Arborean</span></div>
+        <span class="state-badge">NSW</span>
+        <h3>Arborean</h3>
+        <p>Specialist woodworking and timber products retailer. Full range of Vinnie's Oil products and expert application advice.</p>
+        <a href="http://arborean.com.au" target="_blank" rel="noopener" class="retailer-link">arborean.com.au <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 9L9 1M9 1H5M9 1v4"/></svg></a>
+      </div>
+
+      <!-- Placeholder retailers to show network is growing -->
+      <div class="retailer-card coming-soon" data-state="vic">
+        <div class="retailer-logo-placeholder"><span style="color:var(--grey-400);">Coming Soon</span></div>
+        <span class="state-badge">VIC</span>
+        <h3>Victoria Stockist</h3>
+        <p>We are actively expanding our Victorian retail network. Contact us to be first in your area.</p>
+        <a href="contact.html" class="retailer-link">Enquire →</a>
+      </div>
+
+      <div class="retailer-card coming-soon" data-state="qld">
+        <div class="retailer-logo-placeholder"><span style="color:var(--grey-400);">Coming Soon</span></div>
+        <span class="state-badge">QLD</span>
+        <h3>Queensland Stockist</h3>
+        <p>Queensland retail partnerships in development. Enquire now to secure your territory.</p>
+        <a href="contact.html" class="retailer-link">Enquire →</a>
+      </div>
+
+      <div class="retailer-card coming-soon" data-state="wa">
+        <div class="retailer-logo-placeholder"><span style="color:var(--grey-400);">Coming Soon</span></div>
+        <span class="state-badge">WA</span>
+        <h3>Western Australia Stockist</h3>
+        <p>WA distribution partnerships being established. Contact us to discuss your location.</p>
+        <a href="contact.html" class="retailer-link">Enquire →</a>
+      </div>
+
+      <div class="retailer-card coming-soon" data-state="sa">
+        <div class="retailer-logo-placeholder"><span style="color:var(--grey-400);">Coming Soon</span></div>
+        <span class="state-badge">SA</span>
+        <h3>South Australia Stockist</h3>
+        <p>SA retail network expanding. Enquire to become the first authorised stockist in your region.</p>
+        <a href="contact.html" class="retailer-link">Enquire →</a>
+      </div>
+
+      <div class="retailer-card online-retailer" data-state="online">
+        <div class="retailer-logo-placeholder"><span>Online</span></div>
+        <span class="state-badge" style="background:rgba(0,91,153,0.08); color:var(--sweden-blue); border-color:rgba(0,91,153,0.2);">Online</span>
+        <h3>Online Retail Partners</h3>
+        <p>Select Vinnie's Oil products are available through authorised online retail partners. Contact us for current online availability.</p>
+        <a href="contact.html" class="retailer-link">Ask Us →</a>
+      </div>
+
+    </div>
+
+    <div style="margin-top:2.5rem; text-align:center; padding:2rem; background:var(--offwhite); border-radius:10px; border:1px dashed var(--grey-200);">
+      <p style="font-size:0.9rem; color:var(--grey-600); margin-bottom:1rem;">Can't find a stockist near you? Our retail network is growing. In the meantime, contact us and we'll help you find the nearest option.</p>
+      <a href="contact.html" class="btn btn-secondary">Contact Us for Help</a>
+    </div>
+  </div>
+</section>
+
+<!-- BECOME A RETAILER -->
+<section id="apply" style="background:var(--offwhite);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">Retailer Enquiries</span>
+      <h2>Become an Authorised <em>Stockist</em></h2>
+      <p>We're actively growing our Australian retail network. If you operate a woodworking, timber, craft, hardware or flooring business and would like to stock Vinnie's Oil, we'd love to hear from you.</p>
+    </div>
+
+    <!-- What we look for -->
+    <div class="grid-3" style="margin-bottom:3rem;">
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg></div>
+        <h3>Specialist Retailers</h3>
+        <p>Woodworking stores, timber merchants, craft shops, flooring specialists, hardware stores with a woodworking focus.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <h3>Customer Knowledge</h3>
+        <p>Retailers who understand their customers' woodworking needs and can advise on the right Vinnie's Oil product for each application.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <h3>Commitment to Quality</h3>
+        <p>Partners who share our commitment to premium, toxin-free products and who represent the Vinnie's Oil brand with integrity.</p>
+      </div>
+    </div>
+
+    <!-- Application form -->
+    <div class="apply-section" id="apply-form">
+      <div class="grid-2" style="gap:4rem; align-items:start;">
+        <div>
+          <h2>Apply to Become a <em>Stockist</em></h2>
+          <p>Fill in the form and we'll be in touch within 3 business days to discuss your application and the onboarding process.</p>
+          <ul class="check-list" style="gap:0.75rem;">
+            <li style="color:rgba(255,255,255,0.75);">Wholesale pricing and margin support</li>
+            <li style="color:rgba(255,255,255,0.75);">Product training and application resources</li>
+            <li style="color:rgba(255,255,255,0.75);">Point-of-sale and merchandising materials</li>
+            <li style="color:rgba(255,255,255,0.75);">Dedicated account support from our team</li>
+            <li style="color:rgba(255,255,255,0.75);">Listing on our authorised retailer directory</li>
+            <li style="color:rgba(255,255,255,0.75);">Consistent, reliable stock supply</li>
+          </ul>
+        </div>
+        <div>
+          <form id="contact-form" novalidate>
+            <div class="apply-form-grid">
+              <div class="form-group form-group-dark">
+                <label for="r-name">Business Name *</label>
+                <input type="text" id="r-name" name="name" placeholder="Your business name" required>
+              </div>
+              <div class="form-group form-group-dark">
+                <label for="r-contact">Contact Name *</label>
+                <input type="text" id="r-contact" name="contact" placeholder="Your name">
+              </div>
+            </div>
+            <div class="form-group form-group-dark">
+              <label for="r-email">Email Address *</label>
+              <input type="email" id="r-email" name="email" placeholder="your@business.com.au" required>
+            </div>
+            <div class="apply-form-grid">
+              <div class="form-group form-group-dark">
+                <label for="r-phone">Phone Number</label>
+                <input type="tel" id="r-phone" name="phone" placeholder="03 xxxx xxxx">
+              </div>
+              <div class="form-group form-group-dark">
+                <label for="r-state">State / Territory</label>
+                <select id="r-state" name="subject">
+                  <option value="">Select state…</option>
+                  <option>New South Wales</option>
+                  <option>Victoria</option>
+                  <option>Queensland</option>
+                  <option>Western Australia</option>
+                  <option>South Australia</option>
+                  <option>Tasmania</option>
+                  <option>ACT</option>
+                  <option>Northern Territory</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group form-group-dark">
+              <label for="r-type">Business Type</label>
+              <select id="r-type" name="business_type">
+                <option value="">Select type…</option>
+                <option>Woodworking / Timber Specialist</option>
+                <option>Hardware / Trade Store</option>
+                <option>Craft / Hobby Store</option>
+                <option>Flooring Specialist</option>
+                <option>Online Retailer</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group form-group-dark">
+              <label for="r-message">Tell us about your business</label>
+              <textarea id="r-message" name="message" placeholder="Describe your store, customer base, and why you'd like to stock Vinnie's Oil…"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Submit Retailer Application</button>
+            <p class="apply-note">We review all applications and respond within 3 business days. By submitting you agree to be contacted by Vinnie's Oil Australia regarding your enquiry.</p>
+          </form>
+          <div id="form-success" style="display:none; background:rgba(122,158,114,0.2); border:1px solid var(--sage); border-radius:8px; padding:1.25rem; margin-top:1rem; color:#fff; align-items:center; gap:10px;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="9"/><path d="M7 11l3 3 5-5"/></svg>
+            <div><strong>Application Received!</strong><br><span style="font-size:0.82rem; opacity:0.8;">Thank you — we'll be in touch within 3 business days.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band"><div class="container"><div class="cta-band-inner">
+  <div><h2>Questions About <em>Stocking Vinnie's Oil?</em></h2><p>Our team is happy to answer any questions before you apply.</p></div>
+  <div class="cta-actions"><a href="contact.html" class="btn btn-primary btn-lg">Contact Us</a><a href="resources.html#dealer" class="btn btn-outline-light btn-lg">Dealer Resources</a></div>
+</div></div></div>
+
+<footer id="footer"><div class="container"><div class="footer-grid">
+  <div class="footer-brand"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia"><p>Authorised national distributor of Vinnie's Oil in Australia. THJP Enterprises Pty Ltd ABN: 56 696 226 203.</p>
+    <div class="footer-social"><a href="https://www.instagram.com/vinniesoil_au/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://x.com/VinniesOilAU" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://www.youtube.com/@VinniesOilAU" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.7-.8-2.1-.9C16.6 5 12 5 12 5s-4.6 0-6.9.1c-.4.1-1.3.1-2.1.9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.8C6.8 19 12 19 12 19s4.6 0 6.9-.2c.4-.1 1.3-.1 2.1-.8.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.7 14.3V9.7l5.6 2.3-5.6 2.3z"/></svg></a><a href="https://www.facebook.com/vinniesoilAU" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a></div>
+  </div>
+  <div class="footer-col"><h4>Products</h4><ul><li><a href="product-upo.html">Ultra Penetrating Oil</a></li><li><a href="product-upo-rustic.html">UPO Rustic Dark</a></li><li><a href="product-eternal-seal.html">Eternal Seal</a></li><li><a href="product-monocoat.html">Universal Monocoat</a></li><li><a href="product-hard-wax.html">Hard Wax</a></li><li><a href="product-soft-wax.html">Soft Wax</a></li></ul></div>
+  <div class="footer-col"><h4>Company</h4><ul><li><a href="story.html">The Story</a></li><li><a href="about.html">About Us</a></li><li><a href="retail-network.html">Retail Network</a></li><li><a href="retail-network.html#apply">Become a Stockist</a></li></ul></div>
+  <div class="footer-col"><h4>Resources</h4><ul><li><a href="resources.html#application">Application Instructions</a></li><li><a href="resources.html#sds">Safety Data Sheets</a></li><li><a href="resources.html#news">News &amp; Media</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>
+</div><div class="footer-bottom"><p>© 2026 Vinnie's Oil Australia. Distributed by THJP Enterprises Pty Ltd.</p></div></div></footer>
+
+<button id="back-top" aria-label="Back to top"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 12V4M4 8l4-4 4 4"/></svg></button>
+<script src="../js/shared.js"></script>
+<script>
+function filterState(state, btn) {
+  document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.retailer-card').forEach(card => {
+    if (state === 'all' || card.dataset.state === state) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+</body></html>

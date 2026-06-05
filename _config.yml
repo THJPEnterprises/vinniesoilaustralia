@@ -1,0 +1,17 @@
+# GitHub Pages configuration — Vinnie's Oil Australia
+title: "Vinnie's Oil Australia"
+description: "Authorised Australian distributor of Vinnie's Oil — premium Swedish wood finishes. 100% toxin-free, food-safe hardwax oils and waxes."
+url: ""
+baseurl: ""
+
+# Disable Jekyll processing of HTML files (serve as static)
+include:
+  - pages/
+  - css/
+  - js/
+
+exclude:
+  - README.md
+
+# No theme — pure static HTML/CSS site
+theme: null

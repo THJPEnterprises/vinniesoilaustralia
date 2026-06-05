@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Vinnie's Oil Australia resources — application instructions, safety data sheets, news and dealer information for stockists and woodworking professionals.">
+<title>Resources — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.resources-nav { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 3rem; }
+.resource-jump { padding: 8px 20px; border: 1.5px solid var(--grey-200); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--forest); text-decoration: none; transition: all 0.2s; background: #fff; }
+.resource-jump:hover { background: var(--forest); color: #fff; border-color: var(--forest); }
+.resource-section { padding: 4rem 0; border-bottom: 1px solid var(--grey-200); }
+.resource-section:last-child { border-bottom: none; }
+.step-card { display: grid; grid-template-columns: 56px 1fr; gap: 1.5rem; padding: 1.5rem; background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; margin-bottom: 1rem; }
+.step-num { width: 40px; height: 40px; background: var(--forest); color: var(--gold); font-weight: 700; font-size: 0.9rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-card h3 { font-size: 0.95rem; color: var(--forest); margin-bottom: 0.3rem; }
+.step-card p { font-size: 0.83rem; margin: 0; }
+.sds-card { display: flex; align-items: center; gap: 1.25rem; padding: 1.25rem 1.5rem; background: #fff; border: 1px solid var(--grey-200); border-radius: 8px; margin-bottom: 0.75rem; transition: box-shadow 0.2s; }
+.sds-card:hover { box-shadow: 0 4px 20px rgba(14,21,18,0.08); }
+.sds-icon { width: 44px; height: 44px; background: rgba(200,131,10,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--amber); flex-shrink: 0; }
+.sds-info { flex: 1; }
+.sds-info h3 { font-size: 0.92rem; color: var(--forest); margin-bottom: 2px; }
+.sds-info p { font-size: 0.78rem; margin: 0; }
+.sds-card .btn { flex-shrink: 0; }
+.news-card { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; overflow: hidden; }
+.news-card-img { height: 180px; background: var(--offwhite); display: flex; align-items: center; justify-content: center; }
+.news-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.news-card-body { padding: 1.25rem 1.5rem; }
+.news-date { font-size: 0.7rem; color: var(--grey-400); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
+.news-card-body h3 { font-size: 0.95rem; color: var(--forest); margin-bottom: 0.4rem; }
+.news-card-body p { font-size: 0.82rem; margin-bottom: 1rem; }
+.dealer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.dealer-card { padding: 2rem; background: var(--offwhite); border-radius: 10px; border: 1px solid var(--grey-200); }
+.dealer-card h3 { color: var(--forest); margin-bottom: 0.6rem; font-size: 1rem; }
+.dealer-card p { font-size: 0.85rem; margin-bottom: 1.25rem; }
+.system-compare { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: 0.85rem; }
+.system-compare th { background: var(--forest); color: rgba(255,255,255,0.85); padding: 12px 16px; text-align: left; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.system-compare td { padding: 11px 16px; border-bottom: 1px solid var(--grey-200); color: var(--grey-800); }
+.system-compare tr:hover td { background: var(--offwhite); }
+.system-compare .check { color: var(--moss); font-weight: 700; font-size: 1rem; }
+.system-compare .cross { color: #ccc; font-size: 1rem; }
+@media (max-width: 768px) { .dealer-grid { grid-template-columns: 1fr; } .step-card { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav id="navbar" role="navigation"><div class="container nav-inner">
+  <a class="nav-logo" href="../index.html"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia logo"><div class="nav-logo-text"><strong>Vinnie's Oil</strong><span>Australia</span></div></a>
+  <ul class="nav-links" role="list">
+    <li><a href="../index.html">Home</a></li><li><a href="story.html">The Story</a></li><li><a href="about.html">About Us</a></li>
+    <li><a href="products.html" class="has-drop">Products</a>
+      <div class="nav-drop"><span class="drop-label">Penetrating Oils &amp; Finishes</span><a href="product-upo.html" class="drop-sub">Ultra Penetrating Oil (UPO)</a><a href="product-upo-rustic.html" class="drop-sub">UPO – Rustic Dark</a><a href="product-eternal-seal.html" class="drop-sub">Eternal Seal</a><a href="product-monocoat.html" class="drop-sub">Universal Monocoat</a><span class="drop-label">Finishing Waxes</span><a href="product-hard-wax.html" class="drop-sub">Hard Wax</a><a href="product-soft-wax.html" class="drop-sub">Soft Wax</a><span class="drop-label">Bundles</span><a href="products.html#bundles" class="drop-sub">Product Bundles</a></div>
+    </li>
+    <li><a href="retail-network.html">Retailers</a></li>
+    <li><a href="resources.html" class="active has-drop">Resources</a>
+      <div class="nav-drop"><a href="resources.html#application">Application Instructions</a><a href="resources.html#sds">Safety Data Sheets</a><a href="resources.html#news">News &amp; Media</a><a href="resources.html#dealer">Dealer Information</a></div>
+    </li>
+  </ul>
+  <a href="contact.html" class="nav-cta"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12L12 1M12 1H6M12 1v6"/></svg>Become a Stockist</a>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</div></nav>
+<div id="mobile-nav" class="mobile-nav"><a href="../index.html">Home</a><a href="story.html">The Story</a><a href="about.html">About Us</a><a href="products.html">Products</a><a href="retail-network.html">Retailers</a><a href="resources.html">Resources</a><a href="contact.html">Contact</a></div>
+
+<div class="page-hero">
+  <div class="page-hero-bg" style="background:linear-gradient(135deg,rgba(14,21,18,0.92) 0%,rgba(45,74,56,0.7) 100%);position:absolute;inset:0;"></div>
+  <div class="container page-hero-inner">
+    <span class="label">Knowledge &amp; Support</span>
+    <h1>Resources &amp; <em>Information</em></h1>
+    <p>Application guides, safety data sheets, product news, and dealer support materials for Vinnie's Oil Australia.</p>
+  </div>
+</div>
+
+<section style="background:var(--white); padding:2rem 0 0;">
+  <div class="container">
+    <div class="resources-nav">
+      <a href="#application" class="resource-jump">📋 Application Instructions</a>
+      <a href="#sds" class="resource-jump">🛡️ Safety Data Sheets</a>
+      <a href="#compare" class="resource-jump">📊 System Comparison</a>
+      <a href="#news" class="resource-jump">📰 News &amp; Media</a>
+      <a href="#dealer" class="resource-jump">🏪 Dealer Information</a>
+      <a href="#faq" class="resource-jump">❓ FAQs</a>
+    </div>
+  </div>
+</section>
+
+<!-- APPLICATION INSTRUCTIONS -->
+<section id="application" style="background:var(--white);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">How to Apply</span>
+      <h2>Application <em>Instructions</em></h2>
+      <p>Follow these steps for best results with the Vinnie's Oil 2K system. Proper surface preparation is the most important factor in achieving a lasting finish.</p>
+    </div>
+
+    <div data-tabs>
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="upo-guide">UPO + Wax / Seal (2K System)</button>
+        <button class="tab-btn" data-tab="monocoat-guide">Universal Monocoat (1-Coat)</button>
+        <button class="tab-btn" data-tab="maintenance">Maintenance &amp; Re-coating</button>
+      </div>
+
+      <div class="tab-panel active" data-panel="upo-guide">
+        <div class="alert alert-success" style="margin-bottom:2rem;">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M6 9l2 2 4-4"/></svg>
+          <span><strong>Best Results:</strong> Always apply UPO first and allow it to begin curing before applying Hard Wax or Eternal Seal. Surface preparation is critical — the cleaner and drier the wood, the deeper the penetration.</span>
+        </div>
+        <div class="step-card"><div class="step-num">1</div><div><h3>Surface Preparation</h3><p>Sand the timber surface to 120–180 grit. Remove all dust with a clean, lint-free cloth or tack cloth. Ensure the wood is completely dry — moisture content should be below 15%. Remove any existing coatings, waxes or oils that may impede penetration.</p></div></div>
+        <div class="step-card"><div class="step-num">2</div><div><h3>Apply Ultra Penetrating Oil (UPO)</h3><p>Apply a thin, even coat of UPO using a lint-free cloth, brush or applicator pad, working in the direction of the grain. Allow the oil to soak in for 10–15 minutes. Wipe off any excess that has not been absorbed — do not leave pools of product on the surface.</p></div></div>
+        <div class="step-card"><div class="step-num">3</div><div><h3>Allow UPO to Cure</h3><p>Allow the UPO to cure for a minimum of 24 hours in a well-ventilated space at room temperature before applying the topcoat. Full cure takes 3 days. Do not use the surface heavily during this period.</p></div></div>
+        <div class="step-card"><div class="step-num">4</div><div><h3>Apply Hard Wax or Eternal Seal</h3><p>Once the UPO has cured, apply a thin, even coat of Hard Wax or Eternal Seal using a clean lint-free cloth or applicator. Work in the direction of the grain. The Hard Wax is buffed in; Eternal Seal is applied and left to dry — do not buff.</p></div></div>
+        <div class="step-card"><div class="step-num">5</div><div><h3>Buff (Hard Wax only)</h3><p>If using Hard Wax, after 15–20 minutes buff the surface with a clean cloth to achieve the desired sheen. For Eternal Seal, simply allow to dry — no buffing required.</p></div></div>
+        <div class="step-card"><div class="step-num">6</div><div><h3>Final Cure</h3><p>Allow a full 3 days for the complete 2K system to cure before heavy use. During the curing period, avoid placing hot items on the surface and clean up any spills immediately with a damp cloth.</p></div></div>
+        <div class="highlight-block" style="margin-top:1.5rem;"><h3>Coverage Rate</h3><p>One 270ml can of UPO covers approximately 25–30m² on a smooth surface. Coverage will be lower on rough, porous or end-grain timber. For best results, apply two thin coats rather than one thick coat on highly absorbent timber.</p></div>
+      </div>
+
+      <div class="tab-panel" data-panel="monocoat-guide">
+        <div class="alert alert-info" style="margin-bottom:2rem;">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M9 6v3M9 12h0"/></svg>
+          <span><strong>One Coat Wonder:</strong> The Universal Monocoat is designed as an all-in-one solution. One coat is typically sufficient for most interior applications on smooth, prepared timber.</span>
+        </div>
+        <div class="step-card"><div class="step-num">1</div><div><h3>Surface Preparation</h3><p>Sand the timber surface to 120–180 grit. Remove all dust thoroughly. Ensure the wood is clean, dry and free from any previous coatings or contaminants.</p></div></div>
+        <div class="step-card"><div class="step-num">2</div><div><h3>Apply Universal Monocoat</h3><p>Apply a thin, even coat using a lint-free cloth or brush, working in the direction of the grain. The Monocoat combines penetrating oil and wax protection in a single application — do not apply too thickly.</p></div></div>
+        <div class="step-card"><div class="step-num">3</div><div><h3>Remove Excess</h3><p>After 15–20 minutes, wipe off any unabsorbed product with a clean cloth. Do not leave excess product on the surface as this can result in a tacky finish.</p></div></div>
+        <div class="step-card"><div class="step-num">4</div><div><h3>Cure &amp; Use</h3><p>Allow 24 hours before light use and 3 days for full cure. The Monocoat requires no buffing and leaves a beautiful natural matte-to-satin finish with no yellowing on light timbers.</p></div></div>
+      </div>
+
+      <div class="tab-panel" data-panel="maintenance">
+        <div class="step-card"><div class="step-num">1</div><div><h3>Assess the Surface</h3><p>Determine whether the surface needs a full re-coat or simply a maintenance wax. If the oil and wax are fully intact and the surface is simply dull, a Soft Wax maintenance coat is all that's needed. If the finish is worn through to bare wood, a full UPO + Wax re-coat may be necessary.</p></div></div>
+        <div class="step-card"><div class="step-num">2</div><div><h3>Clean the Surface</h3><p>Clean the surface thoroughly with a damp cloth and mild, pH-neutral cleaner. Allow to dry completely before applying any maintenance product.</p></div></div>
+        <div class="step-card"><div class="step-num">3</div><div><h3>Apply Soft Wax (Maintenance Coat)</h3><p>For routine maintenance, apply a thin coat of Vinnie's Soft Wax using a cloth, working it into the surface in the direction of the grain. Buff with a clean dry cloth after 15–20 minutes. This refreshes the surface barrier and extends the life of the underlying oil finish.</p></div></div>
+        <div class="step-card"><div class="step-num">4</div><div><h3>Spot Repair</h3><p>For localised worn areas, lightly sand the spot with 180-grit, wipe clean, apply UPO to the area, allow to cure, then apply Hard Wax or Eternal Seal. Feather the edges to blend with the surrounding finish.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SDS -->
+<section id="sds" style="background:var(--offwhite);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">Safety Information</span>
+      <h2>Safety Data <em>Sheets</em></h2>
+      <p>All Vinnie's Oil products are 100% toxin-free and VOC-free. Safety Data Sheets are available for reference and compliance purposes. Because our products contain no hazardous substances, SDS documentation is straightforward.</p>
+    </div>
+    <div class="alert alert-success" style="margin-bottom:2rem;">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M6 9l2 2 4-4"/></svg>
+      <span><strong>No Hazardous Substances.</strong> Vinnie's Oil products contain no solvents, VOCs, isocyanates or other regulated hazardous substances. No special ventilation, PPE or disposal procedures are required under normal application conditions.</span>
+    </div>
+
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>Ultra Penetrating Oil (UPO) — SDS</h3><p>Safety Data Sheet for Vinnie's Oil UPO 270ml. VOC-free, toxin-free penetrating oil.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>UPO – Rustic Dark — SDS</h3><p>Safety Data Sheet for Vinnie's Oil UPO Rustic Dark 270ml. Dark-toned penetrating oil.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>Eternal Seal — SDS</h3><p>Safety Data Sheet for Vinnie's Eternal Seal 270ml topcoat barrier.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>Universal Monocoat (UNI) — SDS</h3><p>Safety Data Sheet for Vinnie's Universal Monocoat 270ml one-coat system.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>Hard Wax — SDS</h3><p>Safety Data Sheet for Vinnie's Hard Wax 270ml concentrated finishing wax.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+    <div class="sds-card"><div class="sds-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/></svg></div><div class="sds-info"><h3>Soft Wax — SDS</h3><p>Safety Data Sheet for Vinnie's Soft Wax maintenance finishing wax.</p></div><a href="contact.html" class="btn btn-outline btn-sm">Request SDS</a></div>
+  </div>
+</section>
+
+<!-- SYSTEM COMPARISON -->
+<section id="compare" style="background:var(--white);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">Product Guide</span>
+      <h2>System <em>Comparison</em></h2>
+      <p>Not sure which Vinnie's Oil product is right for your project? Use this guide to compare the key characteristics of each product.</p>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="system-compare">
+        <thead>
+          <tr><th>Feature</th><th>UPO</th><th>UPO Rustic</th><th>Eternal Seal</th><th>Monocoat</th><th>Hard Wax</th><th>Soft Wax</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Penetrating Oil</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+          <tr><td>Surface Protection</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+          <tr><td>Dark Tone</td><td class="cross">—</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+          <tr><td>Food Safe</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+          <tr><td>No Yellowing</td><td class="check">✓</td><td class="cross">—</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+          <tr><td>One-Coat System</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+          <tr><td>Cures in 3 Days</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+          <tr><td>Ideal for Maintenance</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td><td class="check">✓</td></tr>
+          <tr><td>Use in 2K System</td><td class="check">✓ (base)</td><td class="check">✓ (base)</td><td class="check">✓ (top)</td><td class="cross">—</td><td class="check">✓ (top)</td><td class="cross">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS -->
+<section id="news" style="background:var(--offwhite);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">Latest Updates</span>
+      <h2>News &amp; <em>Media</em></h2>
+    </div>
+    <div class="grid-3">
+      <div class="news-card">
+        <div class="news-card-img"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUAZ3SbM49rOUSjbb5HWlUggo_ShOiWOD4SM4sJCovaV6uOxpYa_WBEcqkEnfj0AiNHblin-P3_MkABmI5WSI5iHUSdkwt5ml6ZSl0OdKgYGrC4JVrSGqTvd2R4w0rVtDHL20f7gCJyVR_7pwUngqX2__zL7owb7AYiXZuyj-9JcDFQjneYXe-j98apneVWu-58feHwqisdLcxVA=w1280" alt="Vinnie's Oil launch" loading="lazy"></div>
+        <div class="news-card-body">
+          <div class="news-date">2024</div>
+          <h3>Vinnie's Oil Arrives in Australia</h3>
+          <p>THJP Enterprises Pty Ltd becomes the exclusive authorised distributor of Vinnie's Oil across Australia, bringing Sweden's strongest toxin-free wood protection system to the Australian market.</p>
+          <a href="about.html" class="btn btn-outline btn-sm">Read More</a>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-card-img"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUANqhXhFNRUocQhOhDZKnM-X0CLFBIvP6qBRPLrCNhRuiKV1A7Jqc_YipdetJbRxvmfCE8cv1buwPhHXTN5RUY9bnkS_9XFhcKJh8gBrU4SpIf9ccCu7BvVRI82IZ8tyLfeqMqq0MpB0cN2FiD-oLvRytMkRgq23L-aDWW2wX8JtYOg8uX9A3LEltPb2Z7xrtQ4iQBbqUxpSNbkLI9FVPnd3E0MQX2FYURS=w1280" alt="UPO Rustic Dark launch" loading="lazy"></div>
+        <div class="news-card-body">
+          <div class="news-date">2024</div>
+          <h3>UPO Rustic Dark Now Available</h3>
+          <p>The newest addition to the Vinnie's Oil range — all the molecular power of UPO with a rich, warm dark tone for rustic, aged and reclaimed timber projects.</p>
+          <a href="product-upo-rustic.html" class="btn btn-outline btn-sm">View Product</a>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-card-img"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUAdrcL7J77Ky2ba7WYr9KYBG68Swtpiwf0nbvnw-0ZFkhUl4B5M_FiVyDSnDCzOnvoSJ32KFSL8COVMwq4nnn1_pYgava477N8nz4fy16fX6Hzc9CeyspjIHASsP_Ci-lvKjwKw7sd9K89tqBbng3XV-3DWQwJt9lFE7A1_MjDJifvHqNpAwuXId-2RXfR_6edYq7AxsH7MOznQXd1IVn9QOMjAFHPcjGQ8=w1280" alt="Eternal Seal" loading="lazy"></div>
+        <div class="news-card-body">
+          <div class="news-date">2024</div>
+          <h3>Retail Network Expanding Nationally</h3>
+          <p>Vinnie's Oil Australia is actively onboarding specialist retailers across all states. Woodworking, timber and craft stores are invited to apply for authorised stockist status.</p>
+          <a href="retail-network.html#apply" class="btn btn-outline btn-sm">Become a Stockist</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEALER INFO -->
+<section id="dealer" style="background:var(--white);">
+  <div class="container">
+    <div class="section-head">
+      <span class="label">For Stockists</span>
+      <h2>Dealer <em>Information</em></h2>
+      <p>Resources and support for authorised Vinnie's Oil retailers. Everything you need to represent the brand effectively and serve your customers well.</p>
+    </div>
+    <div class="dealer-grid">
+      <div class="dealer-card">
+        <h3>📦 Ordering &amp; Supply</h3>
+        <p>Authorised stockists place orders directly through Vinnie's Oil Australia. We maintain consistent stock levels to ensure your shelves are never empty. Contact us to discuss minimum order quantities, pricing and delivery schedules.</p>
+        <a href="contact.html" class="btn btn-secondary btn-sm">Contact for Orders</a>
+      </div>
+      <div class="dealer-card">
+        <h3>🎓 Product Training</h3>
+        <p>We provide comprehensive product training for retailer staff — covering the Vinnie's Oil philosophy, product range, application techniques and how to advise customers on the right product for their project.</p>
+        <a href="contact.html" class="btn btn-secondary btn-sm">Request Training</a>
+      </div>
+      <div class="dealer-card">
+        <h3>🖼️ Marketing &amp; POS Materials</h3>
+        <p>Authorised stockists receive branded point-of-sale materials, product cards, display stands and digital assets. These are provided to help you merchandise the range effectively and drive in-store sales.</p>
+        <a href="contact.html" class="btn btn-secondary btn-sm">Request Materials</a>
+      </div>
+      <div class="dealer-card">
+        <h3>📋 Technical Support</h3>
+        <p>Our team is available to assist with technical questions about application, compatibility and troubleshooting. We're here to support both your staff and your customers with expert advice when it's needed.</p>
+        <a href="contact.html" class="btn btn-secondary btn-sm">Get Support</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background:var(--offwhite);">
+  <div class="container">
+    <div class="section-head"><span class="label">Common Questions</span><h2>Frequently Asked <em>Questions</em></h2></div>
+    <div style="max-width:760px;">
+      <div class="accordion-item"><button class="accordion-btn">What makes Vinnie's Oil different from other hardwax oils?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">Vinnie's Oil uses the smallest molecule structure of any hardwax oil on the market, allowing it to penetrate deeper without solvents. It is the only truly toxin-free hardwax oil system that delivers professional-grade performance — curing in just 3 days with 25–30m² coverage per can. No gloves or respirator required, and 100% food safe.</div></div>
+      <div class="accordion-item"><button class="accordion-btn">Is Vinnie's Oil really food safe?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">Yes. All Vinnie's Oil products are 100% food safe once fully cured. They contain no solvents, VOCs, isocyanates or any hazardous substances. This makes them ideal for kitchen benchtops, dining tables, cutting boards, children's furniture and any surface that may come into contact with food or hands.</div></div>
+      <div class="accordion-item"><button class="accordion-btn">What surfaces can Vinnie's Oil be used on?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">Vinnie's Oil bonds to wood, metal, stone, concrete, plastic, epoxy and leather. It is primarily designed for timber but its unique small-molecule formula makes it the most versatile wood protection system on the market. Always test on a small inconspicuous area first on non-timber surfaces.</div></div>
+      <div class="accordion-item"><button class="accordion-btn">How long does Vinnie's Oil take to cure?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">Vinnie's Oil is dry to light touch within a few hours and ready for light use within 24 hours. Full cure takes 3 days — significantly faster than many other natural hardwax oils. Avoid heavy use, water exposure or placing hot items on the surface during the curing period.</div></div>
+      <div class="accordion-item"><button class="accordion-btn">Can I buy Vinnie's Oil directly from you?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">No — Vinnie's Oil Australia distributes exclusively through our network of authorised specialist retailers. We do not sell direct to consumers. Please visit our retail network page to find your nearest stockist, or contact us if you can't find a stockist near you.</div></div>
+      <div class="accordion-item"><button class="accordion-btn">I'm a retailer — how do I apply to stock Vinnie's Oil?<span class="acc-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 1v8M1 5h8"/></svg></span></button><div class="accordion-body">Visit our Retail Network page and complete the stockist application form. We review all applications and respond within 3 business days. We welcome woodworking stores, timber merchants, craft shops, flooring specialists and other relevant retailers across all Australian states and territories.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band"><div class="container"><div class="cta-band-inner"><div><h2>Can't Find What You're <em>Looking For?</em></h2><p>Our team is happy to help with any technical, product or trade enquiry.</p></div><div class="cta-actions"><a href="contact.html" class="btn btn-primary btn-lg">Contact Us</a><a href="retail-network.html" class="btn btn-outline-light btn-lg">Find a Retailer</a></div></div></div></div>
+
+<footer id="footer"><div class="container"><div class="footer-grid">
+  <div class="footer-brand"><img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia"><p>Authorised national distributor of Vinnie's Oil in Australia. THJP Enterprises Pty Ltd ABN: 56 696 226 203.</p><div class="footer-social"><a href="https://www.instagram.com/vinniesoil_au/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://x.com/VinniesOilAU" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://www.facebook.com/vinniesoilAU" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a></div></div>
+  <div class="footer-col"><h4>Products</h4><ul><li><a href="product-upo.html">Ultra Penetrating Oil</a></li><li><a href="product-upo-rustic.html">UPO Rustic Dark</a></li><li><a href="product-eternal-seal.html">Eternal Seal</a></li><li><a href="product-monocoat.html">Universal Monocoat</a></li><li><a href="product-hard-wax.html">Hard Wax</a></li><li><a href="product-soft-wax.html">Soft Wax</a></li></ul></div>
+  <div class="footer-col"><h4>Company</h4><ul><li><a href="story.html">The Story</a></li><li><a href="about.html">About Us</a></li><li><a href="retail-network.html">Retail Network</a></li><li><a href="retail-network.html#apply">Become a Stockist</a></li></ul></div>
+  <div class="footer-col"><h4>Resources</h4><ul><li><a href="resources.html#application">Application Instructions</a></li><li><a href="resources.html#sds">Safety Data Sheets</a></li><li><a href="resources.html#news">News &amp; Media</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>
+</div><div class="footer-bottom"><p>© 2026 Vinnie's Oil Australia. Distributed by THJP Enterprises Pty Ltd.</p></div></div></footer>
+<button id="back-top" aria-label="Back to top"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 12V4M4 8l4-4 4 4"/></svg></button>
+<script src="../js/shared.js"></script>
+</body></html>
