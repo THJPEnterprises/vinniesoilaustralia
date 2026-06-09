@@ -65,18 +65,28 @@ if (revealEls.length) {
   revealEls.forEach(el => io.observe(el));
 }
 
-/* ─── FORM SUBMIT (mailto fallback) ─── */
+/* ─── FORM SUBMIT (Formspree) ─── */
 const contactForm = document.getElementById('contact-form');
+
 if (contactForm) {
-  contactForm.addEventListener('submit', function(e) {
+  contactForm.addEventListener('submit', async function (e) {
     e.preventDefault();
-    const name = this.querySelector('[name=name]')?.value || '';
-    const email = this.querySelector('[name=email]')?.value || '';
-    const subject = this.querySelector('[name=subject]')?.value || 'Website Enquiry';
-    const msg = this.querySelector('[name=message]')?.value || '';
-    const body = encodeURIComponent('From: ' + name + '\nEmail: ' + email + '\n\n' + msg);
-    window.location.href = 'mailto:info@vinniesoilaustralia.com?subject=' + encodeURIComponent(subject) + '&body=' + body;
-    const success = document.getElementById('form-success');
-    if (success) success.style.display = 'flex';
+
+    const formData = new FormData(contactForm);
+
+    const res = await fetch(contactForm.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (res.ok) {
+      const success = document.getElementById('form-success');
+      if (success) success.style.display = 'flex';
+
+      contactForm.reset();
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
   });
 }
