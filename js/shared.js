@@ -69,24 +69,27 @@ if (revealEls.length) {
 const contactForm = document.getElementById('contact-form');
 
 if (contactForm) {
-  contactForm.addEventListener('submit', async function (e) {
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const formData = new FormData(contactForm);
 
-    const res = await fetch(contactForm.action, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Accept': 'application/json' }
-    });
+    try {
+      const res = await fetch(contactForm.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
 
-    if (res.ok) {
-      const success = document.getElementById('form-success');
-      if (success) success.style.display = 'flex';
-
-      contactForm.reset();
-    } else {
-      alert('Something went wrong. Please try again.');
+      if (res.ok) {
+        const success = document.getElementById('form-success');
+        if (success) success.style.display = 'flex';
+        contactForm.reset();
+      } else {
+        alert('Submission failed. Please try again.');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
     }
   });
 }
