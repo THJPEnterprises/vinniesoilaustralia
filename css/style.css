@@ -317,6 +317,17 @@ section { padding: var(--section-py) 0; }
   overflow: hidden;
 }
 
+.hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flag {
+  font-size: 1.2rem; /* adjust size as needed */
+  line-height: 1;
+}
+
 .page-hero-inner {
   padding: 5rem 0 4rem;
   position: relative;
