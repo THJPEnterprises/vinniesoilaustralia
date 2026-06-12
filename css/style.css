@@ -335,17 +335,6 @@ section { padding: var(--section-py) 0; }
 .page-hero h1 em { font-family: var(--font-serif); font-style: italic; color: var(--gold); }
 .page-hero p { color: rgba(255,255,255,0.65); max-width: 580px; font-size: 1.05rem; }
 
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.hero-badge .flag {
-    font-size: 1.2rem;
-    line-height: 1;
-    display: inline-block;
-}
 
 /* ─── SECTION HEADINGS ─── */
 .section-head { margin-bottom: 3rem; }
