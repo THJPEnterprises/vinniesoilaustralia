@@ -250,6 +250,21 @@ section { padding: var(--section-py) 0; }
 
 .nav-cta:hover { background: var(--gold); transform: translateY(-1px); }
 
+.nav-login-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 4px;
+  margin-right: 10px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.nav-login-link:hover { color: #fff; border-color: rgba(255,255,255,0.6); }
+
 /* Mobile hamburger */
 .nav-hamburger {
   display: none;
@@ -1058,6 +1073,7 @@ body.has-notice main { padding-top: 36px; }
   .grid-4 { grid-template-columns: 1fr 1fr; }
   .nav-links { display: none; }
   .nav-cta { display: none; }
+  .nav-login-link { display: none; }
   .nav-hamburger { display: flex; }
   .footer-grid { grid-template-columns: 1fr; }
   .stat-strip .container > div { grid-template-columns: 1fr 1fr; }

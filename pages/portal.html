@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Reseller Portal — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+body { background: var(--offwhite); }
+#portal-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.portal-topbar {
+  background: var(--forest); color: #fff; padding: 1rem 5vw;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.portal-topbar .p-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+.portal-topbar .p-brand img { height: 30px; }
+.portal-topbar .p-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 1rem; }
+.portal-topbar .p-user button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; }
+.portal-topbar .p-user button:hover { background: rgba(255,255,255,0.1); }
+.portal-body { max-width: 1100px; margin: 0 auto; padding: 3rem 5vw 5rem; }
+.portal-section { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 2rem; margin-bottom: 2rem; }
+.portal-section h2 { font-size: 1.15rem; color: var(--forest); margin-bottom: 1.25rem; }
+.res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 1rem; }
+.res-card { border: 1px solid var(--grey-200); border-radius: 8px; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 12px; }
+.res-card .res-icon { width: 36px; height: 36px; background: rgba(74,103,65,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--pine); flex-shrink: 0; }
+.res-card .res-title { font-size: 0.85rem; font-weight: 600; color: var(--forest); }
+.res-card .res-desc { font-size: 0.72rem; color: var(--grey-600); }
+.res-card a { margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--pine); text-decoration: underline; flex-shrink: 0; }
+#pending-notice, #load-error { display: none; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 1rem; }
+.gallery-item { position: relative; border: 1px solid var(--grey-200); border-radius: 8px; overflow: hidden; background: var(--offwhite); }
+.gallery-item .gallery-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--grey-100); }
+.gallery-item .gallery-caption { padding: 0.6rem 0.75rem; }
+.gallery-item .gallery-title { font-size: 0.78rem; font-weight: 600; color: var(--forest); }
+.gallery-item .gallery-actions { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
+.gallery-item .gallery-actions a { font-size: 0.7rem; font-weight: 600; color: var(--pine); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Shown while checking auth / if not approved -->
+<div id="portal-gate" style="display:none;">
+  <div style="text-align:center; max-width:420px; padding:2rem;">
+    <h2 style="color:var(--forest); margin-bottom:0.75rem;" id="gate-title">Checking access…</h2>
+    <p id="gate-message" style="color:var(--grey-600); font-size:0.9rem;"></p>
+    <a href="portal-login.html" class="btn btn-secondary" style="margin-top:1.5rem;">Back to Login</a>
+  </div>
+</div>
+
+<div id="portal-app" style="display:none;">
+  <div class="portal-topbar">
+    <div class="p-brand">
+      <img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="">
+      Reseller Portal
+    </div>
+    <div class="p-user">
+      <span id="user-email"></span>
+      <button id="logout-btn">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="portal-body">
+    <div class="badge badge-green" style="margin-bottom:1rem;">Wholesale Account</div>
+    <h1 style="color:var(--forest); font-size:1.8rem; margin-bottom:2rem;">Welcome back</h1>
+
+    <div class="portal-section">
+      <h2>Wholesale Price List</h2>
+      <div id="pricing-wrap" style="overflow-x:auto;">
+        <table class="data-table" id="pricing-table">
+          <thead>
+            <tr><th>SKU</th><th>Product</th><th>Size</th><th>Wholesale (AUD)</th><th>RRP (AUD)</th><th>Min Order</th></tr>
+          </thead>
+          <tbody id="pricing-body">
+            <tr><td colspan="6" style="color:var(--grey-400);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="form-note">Prices exclude GST and freight. To place an order, email your PO to <a href="mailto:info@vinniesoilaustralia.com" style="color:var(--pine);">info@vinniesoilaustralia.com</a> or contact your account manager.</p>
+    </div>
+
+    <div class="portal-section">
+      <h2>Product Image Gallery</h2>
+      <div class="gallery-grid" id="gallery-grid">
+        <p style="color:var(--grey-400); font-size:0.85rem;">Loading…</p>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <h2>Dealer Resources</h2>
+      <div class="res-grid" id="resources-grid">
+        <p style="color:var(--grey-400); font-size:0.85rem;">Loading…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
+<script>
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+const gate = document.getElementById('portal-gate');
+const gateTitle = document.getElementById('gate-title');
+const gateMsg = document.getElementById('gate-message');
+const app = document.getElementById('portal-app');
+
+function showGate(title, msg) {
+  gateTitle.textContent = title;
+  gateMsg.textContent = msg;
+  gate.style.display = 'flex';
+  app.style.display = 'none';
+}
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'portal-login.html';
+    return;
+  }
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('approved, business_name, email')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profileErr || !profile) {
+    showGate('Account Not Found', 'We could not find a portal profile for your account. Please contact us for assistance.');
+    return;
+  }
+
+  if (!profile.approved) {
+    showGate('Access Pending Approval', 'Your account has been created but is awaiting approval from our team. You will be notified by email once your wholesale access is active.');
+    return;
+  }
+
+  document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
+  app.style.display = 'block';
+  gate.style.display = 'none';
+
+  loadPricing();
+  loadGallery();
+  loadResources();
+}
+
+// Resolves a resources.file_path to a usable URL. If it's already a full
+// external link (e.g. a Google Drive share URL), use it as-is. Otherwise
+// treat it as a path inside the dealer-resources Storage bucket and
+// generate a 1-hour signed URL.
+async function resolveFileUrl(filePath) {
+  if (/^https?:\/\//i.test(filePath)) return filePath;
+  const { data: signed } = await supabase.storage
+    .from('dealer-resources')
+    .createSignedUrl(filePath, 3600);
+  return signed?.signedUrl ?? '#';
+}
+
+async function loadGallery() {
+  const grid = document.getElementById('gallery-grid');
+  const { data, error } = await supabase
+    .from('resources')
+    .select('*')
+    .eq('category', 'product-images')
+    .order('title', { ascending: true });
+
+  if (error) {
+    grid.innerHTML = '<p style="color:#a13a00; font-size:0.85rem;">Unable to load images right now.</p>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">No product images published yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  for (const r of data) {
+    const url = await resolveFileUrl(r.file_path);
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `
+      <a href="${url}" target="_blank" rel="noopener"><img class="gallery-thumb" src="${url}" alt="${r.title}" loading="lazy"></a>
+      <div class="gallery-caption">
+        <div class="gallery-title">${r.title}</div>
+        <div class="gallery-actions"><a href="${url}" target="_blank" rel="noopener">View full size</a><a href="${url}" download>Download</a></div>
+      </div>`;
+    grid.appendChild(item);
+  }
+}
+
+async function loadPricing() {
+  const body = document.getElementById('pricing-body');
+  const { data, error } = await supabase
+    .from('wholesale_prices')
+    .select('*')
+    .order('product_name', { ascending: true });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="6" style="color:#a13a00;">Unable to load pricing right now.</td></tr>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" style="color:var(--grey-400);">No pricing published yet — check back soon.</td></tr>';
+    return;
+  }
+  body.innerHTML = data.map(r => `
+    <tr>
+      <td>${r.sku ?? ''}</td>
+      <td>${r.product_name ?? ''}</td>
+      <td>${r.size ?? ''}</td>
+      <td>$${Number(r.wholesale_price_aud ?? 0).toFixed(2)}</td>
+      <td>${r.rrp_aud != null ? '$' + Number(r.rrp_aud).toFixed(2) : '—'}</td>
+      <td>${r.min_order_qty ?? 1}</td>
+    </tr>`).join('');
+}
+
+async function loadResources() {
+  const grid = document.getElementById('resources-grid');
+  const { data, error } = await supabase
+    .from('resources')
+    .select('*')
+    .neq('category', 'product-images')
+    .order('category', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    grid.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">No resources published yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  for (const r of data) {
+    const url = await resolveFileUrl(r.file_path);
+    const card = document.createElement('div');
+    card.className = 'res-card';
+    card.innerHTML = `
+      <div class="res-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2h5l3 3v9H4z"/><path d="M9 2v3h3"/></svg></div>
+      <div><div class="res-title">${r.title}</div><div class="res-desc">${r.description ?? ''}</div></div>
+      <a href="${url}" target="_blank" rel="noopener">Download</a>`;
+    grid.appendChild(card);
+  }
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'portal-login.html';
+});
+
+init();
+</script>
+</body>
+</html>

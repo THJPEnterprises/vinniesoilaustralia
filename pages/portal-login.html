@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Reseller &amp; Wholesaler Login — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.portal-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--forest);
+  padding: 2rem 5vw;
+}
+.portal-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2.75rem 2.5rem;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+}
+.portal-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 1.75rem; }
+.portal-logo img { height: 34px; width: auto; }
+.portal-logo span { font-size: 0.95rem; font-weight: 700; color: var(--forest); }
+.portal-card h1 { font-size: 1.4rem; color: var(--forest); margin-bottom: 0.35rem; }
+.portal-card > p.sub { font-size: 0.85rem; color: var(--grey-600); margin-bottom: 1.75rem; }
+#portal-error, #portal-info {
+  display: none;
+  font-size: 0.8rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+}
+#portal-error { background: rgba(200,60,10,0.08); color: #a13a00; border-left: 3px solid #c8460a; }
+#portal-info { background: rgba(74,103,65,0.1); color: var(--pine); border-left: 3px solid var(--moss); }
+.portal-footnote { font-size: 0.75rem; color: var(--grey-400); margin-top: 1.5rem; text-align: center; }
+.portal-footnote a { color: var(--pine); text-decoration: underline; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
+.back-link:hover { color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="portal-wrap">
+  <div style="position:absolute; top:2rem; left:5vw;">
+    <a href="../index.html" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2L4 7l7 5"/></svg>
+      Back to main site
+    </a>
+  </div>
+
+  <div class="portal-card">
+    <div class="portal-logo">
+      <img src="https://lh3.googleusercontent.com/sitesv/AA5AbUCoo_WL6AChgJaoyFLR0dcKLVNez3DgXglB61Tvtv3uzZLg87GVhSZ7TerH4gkt-ZB7n2Q8EieHNnEj9mL3Z6bYc0D7nRv38YLzozRnzecy5qWKgEJXH0DodwbEhOqxJdmh9RmrDi-uZFoulasjxsOj2IH8PxhqGC6sXJ7CHShUmnN7AwVjZfroTHM=w16383" alt="Vinnie's Oil Australia">
+      <span>Vinnie's Oil Australia</span>
+    </div>
+
+    <h1>Reseller &amp; Wholesaler Portal</h1>
+    <p class="sub">Sign in with your business account to access wholesale pricing, ordering and dealer resources.</p>
+
+    <div id="portal-error"></div>
+    <div id="portal-info"></div>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label for="p-email">Email Address</label>
+        <input type="email" id="p-email" name="email" placeholder="you@yourbusiness.com.au" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="p-password">Password</label>
+        <input type="password" id="p-password" name="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" id="login-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Sign In</button>
+    </form>
+
+    <p class="portal-footnote">
+      Forgot your password? <a href="#" id="reset-link">Reset it here</a>.<br>
+      Not a stockist yet? <a href="contact.html">Apply for wholesale access</a>.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
+<script>
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+const form = document.getElementById('login-form');
+const errBox = document.getElementById('portal-error');
+const infoBox = document.getElementById('portal-info');
+const btn = document.getElementById('login-btn');
+
+function showError(msg) {
+  errBox.textContent = msg;
+  errBox.style.display = 'block';
+  infoBox.style.display = 'none';
+}
+function showInfo(msg) {
+  infoBox.textContent = msg;
+  infoBox.style.display = 'block';
+  errBox.style.display = 'none';
+}
+
+// If already signed in, skip straight to the portal
+supabase.auth.getSession().then(({ data }) => {
+  if (data.session) window.location.href = 'portal.html';
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+  infoBox.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  const email = document.getElementById('p-email').value.trim();
+  const password = document.getElementById('p-password').value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Sign In';
+
+  if (error) {
+    showError(error.message === 'Invalid login credentials'
+      ? 'Incorrect email or password. Please try again.'
+      : error.message);
+    return;
+  }
+  window.location.href = 'portal.html';
+});
+
+document.getElementById('reset-link').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('p-email').value.trim();
+  if (!email) { showError('Enter your email above first, then click "Reset it here".'); return; }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  if (error) { showError(error.message); return; }
+  showInfo('Password reset email sent — check your inbox. The link will bring you back here to set a new password.');
+});
+
+// Handle the "PASSWORD_RECOVERY" flow: user arrives back here via the emailed
+// link, already in a temporary authenticated state — prompt for a new password.
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    const newPassword = window.prompt('Enter a new password for your account:');
+    if (!newPassword) return;
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) { showError(error.message); return; }
+    showInfo('Password updated — you can now sign in.');
+    await supabase.auth.signOut();
+  }
+});
+</script>
+</body>
+</html>
