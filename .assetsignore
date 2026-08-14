@@ -1,0 +1,9 @@
+.git
+.github
+node_modules
+.wrangler
+wrangler.jsonc
+schema.sql
+populate.sql
+PORTAL-SETUP.md
+README.md
