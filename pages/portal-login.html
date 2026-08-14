@@ -40,9 +40,42 @@
 .portal-footnote a { color: var(--pine); text-decoration: underline; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; }
 .back-link:hover { color: #fff; }
+
+#toast-stack {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { background: var(--moss); color: #fff; }
+.toast-error { background: #c8460a; color: #fff; }
+.toast svg { flex-shrink: 0; }
 </style>
 </head>
 <body>
+
+<div id="toast-stack"></div>
 
 <div class="portal-wrap">
   <div style="position:absolute; top:2rem; left:5vw;">
@@ -104,6 +137,25 @@ function showInfo(msg) {
   errBox.style.display = 'none';
 }
 
+// Prominent, hard-to-miss confirmation banner (separate from the inline
+// error/info boxes) — used to confirm actions like "reset email sent".
+const toastStack = document.getElementById('toast-stack');
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + (type === 'error' ? 'error' : 'success');
+  const icon = type === 'error'
+    ? '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M9 6v3M9 12h0"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7"/><path d="M6 9l2 2 4-4"/></svg>';
+  toast.innerHTML = icon + '<span></span>';
+  toast.querySelector('span').textContent = msg;
+  toastStack.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
 // If already signed in, skip straight to the portal
 supabase.auth.getSession().then(({ data }) => {
   if (data.session) window.location.href = 'portal.html';
@@ -133,19 +185,34 @@ form.addEventListener('submit', async (e) => {
   window.location.href = 'portal.html';
 });
 
-document.getElementById('reset-link').addEventListener('click', async (e) => {
+const resetLink = document.getElementById('reset-link');
+resetLink.addEventListener('click', async (e) => {
   e.preventDefault();
   const email = document.getElementById('p-email').value.trim();
   if (!email) { showError('Enter your email above first, then click "Reset it here".'); return; }
+
+  const originalText = resetLink.textContent;
+  resetLink.textContent = 'Sending…';
+  resetLink.style.pointerEvents = 'none';
+
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + window.location.pathname
     });
-    if (error) { showError(error.message); return; }
+    if (error) {
+      showError(error.message);
+      showToast(error.message, 'error');
+      return;
+    }
     showInfo('Password reset email sent — check your inbox. The link will bring you back here to set a new password.');
+    showToast('Reset email sent to ' + email, 'success');
   } catch (err) {
     console.error('Password reset failed:', err);
     showError('Something went wrong sending the reset email: ' + (err?.message || err));
+    showToast('Something went wrong sending the reset email', 'error');
+  } finally {
+    resetLink.textContent = originalText;
+    resetLink.style.pointerEvents = '';
   }
 });
 
