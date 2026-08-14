@@ -40,6 +40,20 @@ body { background: var(--offwhite); }
 .approval-card .biz { font-weight: 600; color: var(--forest); font-size: 0.88rem; }
 .approval-card .email { font-size: 0.78rem; color: var(--grey-600); }
 
+.admin-table-wrap { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.admin-table th { background: var(--forest); color: rgba(255,255,255,0.85); font-weight: 600; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 12px; text-align: left; white-space: nowrap; }
+.admin-table td { padding: 8px 12px; border-bottom: 1px solid var(--grey-200); vertical-align: middle; }
+.admin-table input, .admin-table select { width: 100%; min-width: 80px; padding: 6px 8px; border: 1.5px solid var(--grey-200); border-radius: 5px; font-family: var(--font-sans); font-size: 0.8rem; }
+.admin-table .row-actions { display: flex; gap: 6px; white-space: nowrap; }
+.section-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(14,21,18,0.6); z-index: 400; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: #fff; border-radius: 10px; padding: 2rem; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+.modal-box h3 { color: var(--forest); margin-bottom: 1.25rem; }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
 #toast-stack {
   position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 500;
   display: flex; flex-direction: column; gap: 0.6rem; align-items: center; pointer-events: none;
@@ -83,7 +97,8 @@ body { background: var(--offwhite); }
   <div class="portal-body">
     <div class="tab-nav" data-tabs>
       <button class="tab-btn active" data-tab="orders">Orders</button>
-      <button class="tab-btn" data-tab="approvals">Pending Approvals <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
+      <button class="tab-btn" data-tab="pricing">Products &amp; Pricing</button>
+      <button class="tab-btn" data-tab="resellers">Resellers <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
     </div>
 
     <div class="tab-panel active" data-panel="orders">
@@ -97,10 +112,63 @@ body { background: var(--offwhite); }
       </div>
     </div>
 
-    <div class="tab-panel" data-panel="approvals">
+    <div class="tab-panel" data-panel="pricing">
+      <div class="section-toolbar">
+        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">Wholesale price feeds the reseller portal &amp; order form. RRP also feeds the public product pages.</p>
+        <button id="add-product-btn" class="btn btn-primary btn-sm">+ Add Product</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="pricing-table">
+          <thead><tr><th>SKU</th><th>Product Name</th><th>Size</th><th>Wholesale $</th><th>RRP $</th><th>Min Order</th><th></th></tr></thead>
+          <tbody id="pricing-table-body"><tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="resellers">
+      <div class="section-toolbar">
+        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">All reseller accounts. Approve, change role, or edit business name inline.</p>
+        <button id="create-user-btn" class="btn btn-primary btn-sm">+ Create New User</button>
+      </div>
       <div id="approvals-list">
         <p style="color:var(--grey-400); font-size:0.85rem;">Loading…</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE USER MODAL -->
+<div class="modal-overlay" id="create-user-modal">
+  <div class="modal-box">
+    <h3>Create New Reseller Account</h3>
+    <div id="create-user-error" style="display:none; background: rgba(200,60,10,0.08); color:#a13a00; border-left:3px solid #c8460a; padding: 0.75rem 1rem; border-radius:6px; font-size:0.85rem; margin-bottom:1.25rem;"></div>
+    <div class="form-group">
+      <label for="cu-email">Email Address *</label>
+      <input type="email" id="cu-email" placeholder="reseller@business.com.au" required>
+    </div>
+    <div class="form-group">
+      <label for="cu-business">Business Name</label>
+      <input type="text" id="cu-business" placeholder="Business or store name">
+    </div>
+    <div class="form-group">
+      <label for="cu-password">Temporary Password *</label>
+      <input type="text" id="cu-password" placeholder="Set a temporary password">
+    </div>
+    <div class="form-group">
+      <label for="cu-role">Role</label>
+      <select id="cu-role">
+        <option value="reseller">Reseller</option>
+        <option value="wholesaler">Wholesaler</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="cu-approved" checked style="width:auto;">
+      <label for="cu-approved" style="margin:0; text-transform:none; letter-spacing:0; font-weight:400; font-size:0.85rem;">Approve immediately (grants portal access right away)</label>
+    </div>
+    <div class="modal-actions">
+      <button id="cu-cancel-btn" class="btn btn-secondary">Cancel</button>
+      <button id="cu-submit-btn" class="btn btn-primary">Create Account</button>
     </div>
   </div>
 </div>
@@ -171,6 +239,7 @@ async function init() {
 
   loadOrders();
   loadApprovals();
+  loadPricing();
 }
 
 async function loadOrders() {
@@ -325,53 +394,195 @@ async function syncToZoho(orderId) {
 
 async function loadApprovals() {
   const list = document.getElementById('approvals-list');
-  const { data: pending, error } = await supabase
+  const { data: allResellers, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('approved', false)
     .order('created_at', { ascending: false });
 
   if (error) {
-    list.innerHTML = '<p style="color:#a13a00; font-size:0.85rem;">Unable to load pending approvals.</p>';
+    list.innerHTML = '<p style="color:#a13a00; font-size:0.85rem;">Unable to load reseller accounts.</p>';
     return;
   }
 
+  const pendingCount = (allResellers || []).filter(p => !p.approved).length;
   const countBadge = document.getElementById('approval-count');
-  if (pending && pending.length > 0) {
-    countBadge.textContent = pending.length;
+  if (pendingCount > 0) {
+    countBadge.textContent = pendingCount;
     countBadge.style.display = 'inline-block';
+  } else {
+    countBadge.style.display = 'none';
   }
 
-  if (!pending || pending.length === 0) {
-    list.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">No accounts awaiting approval.</p>';
+  if (!allResellers || allResellers.length === 0) {
+    list.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">No reseller accounts yet.</p>';
     return;
   }
 
-  list.innerHTML = pending.map(p => `
-    <div class="approval-card" data-id="${p.id}">
-      <div>
-        <div class="biz">${escapeHtml(p.business_name || 'No business name set')}</div>
-        <div class="email">${escapeHtml(p.email)}</div>
-      </div>
-      <button class="btn btn-primary btn-sm approve-btn" data-id="${p.id}">Approve</button>
-    </div>`).join('');
+  list.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Approved</th><th></th></tr></thead>
+        <tbody>
+          ${allResellers.map(p => `
+            <tr data-id="${p.id}">
+              <td>${escapeHtml(p.email)}</td>
+              <td><input type="text" class="rs-business" value="${escapeHtml(p.business_name || '')}" placeholder="Business name"></td>
+              <td>
+                <select class="rs-role">
+                  <option value="reseller" ${p.role === 'reseller' ? 'selected' : ''}>Reseller</option>
+                  <option value="wholesaler" ${p.role === 'wholesaler' ? 'selected' : ''}>Wholesaler</option>
+                  <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+              </td>
+              <td style="text-align:center;"><input type="checkbox" class="rs-approved" ${p.approved ? 'checked' : ''} style="width:auto;"></td>
+              <td><button class="btn btn-primary btn-sm rs-save-btn">Save</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 
-  document.querySelectorAll('.approve-btn').forEach(btn => {
+  document.querySelectorAll('.rs-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const business_name = row.querySelector('.rs-business').value.trim() || null;
+      const role = row.querySelector('.rs-role').value;
+      const approved = row.querySelector('.rs-approved').checked;
+
       btn.disabled = true;
-      btn.textContent = 'Approving…';
-      const { error } = await supabase.from('profiles').update({ approved: true }).eq('id', btn.dataset.id);
-      if (error) {
-        showToast('Failed to approve: ' + error.message, 'error');
-        btn.disabled = false;
-        btn.textContent = 'Approve';
-        return;
-      }
-      showToast('Account approved', 'success');
+      btn.textContent = 'Saving…';
+      const { error } = await supabase.from('profiles').update({ business_name, role, approved }).eq('id', id);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+      showToast('Reseller account updated', 'success');
       loadApprovals();
     });
   });
 }
+
+// ─── PRODUCTS & PRICING ───
+async function loadPricing() {
+  const body = document.getElementById('pricing-table-body');
+  const { data, error } = await supabase.from('wholesale_prices').select('*').order('product_name', { ascending: true });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="7" style="color:#a13a00; padding:1.25rem;">Unable to load pricing.</td></tr>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">No products yet — click "+ Add Product" to create one.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(p => `
+    <tr data-id="${p.id}">
+      <td><input type="text" class="pr-sku" value="${escapeHtml(p.sku)}"></td>
+      <td><input type="text" class="pr-name" value="${escapeHtml(p.product_name)}"></td>
+      <td><input type="text" class="pr-size" value="${escapeHtml(p.size || '')}"></td>
+      <td><input type="number" step="0.01" class="pr-wholesale" value="${p.wholesale_price_aud ?? ''}"></td>
+      <td><input type="number" step="0.01" class="pr-rrp" value="${p.rrp_aud ?? ''}"></td>
+      <td><input type="number" step="1" class="pr-moq" value="${p.min_order_qty ?? 1}"></td>
+      <td class="row-actions">
+        <button class="btn btn-primary btn-sm pr-save-btn">Save</button>
+        <button class="btn btn-outline btn-sm pr-delete-btn">Delete</button>
+      </td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.pr-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const payload = {
+        sku: row.querySelector('.pr-sku').value.trim(),
+        product_name: row.querySelector('.pr-name').value.trim(),
+        size: row.querySelector('.pr-size').value.trim() || null,
+        wholesale_price_aud: Number(row.querySelector('.pr-wholesale').value) || 0,
+        rrp_aud: row.querySelector('.pr-rrp').value === '' ? null : Number(row.querySelector('.pr-rrp').value),
+        min_order_qty: Number(row.querySelector('.pr-moq').value) || 1,
+      };
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      const { error } = await supabase.from('wholesale_prices').update(payload).eq('id', id);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+      showToast('Product updated', 'success');
+    });
+  });
+
+  document.querySelectorAll('.pr-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this product? This cannot be undone.')) return;
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const { error } = await supabase.from('wholesale_prices').delete().eq('id', id);
+      if (error) { showToast('Failed to delete: ' + error.message, 'error'); return; }
+      showToast('Product deleted', 'success');
+      loadPricing();
+    });
+  });
+}
+
+document.getElementById('add-product-btn').addEventListener('click', async () => {
+  const { data, error } = await supabase
+    .from('wholesale_prices')
+    .insert({ sku: 'NEW-SKU', product_name: 'New Product', wholesale_price_aud: 0, min_order_qty: 1 })
+    .select()
+    .single();
+  if (error) { showToast('Failed to add product: ' + error.message, 'error'); return; }
+  showToast('Product added — edit the details below', 'success');
+  loadPricing();
+});
+
+// ─── CREATE USER MODAL ───
+const createUserModal = document.getElementById('create-user-modal');
+const createUserErr = document.getElementById('create-user-error');
+
+document.getElementById('create-user-btn').addEventListener('click', () => {
+  createUserErr.style.display = 'none';
+  document.getElementById('cu-email').value = '';
+  document.getElementById('cu-business').value = '';
+  document.getElementById('cu-password').value = '';
+  document.getElementById('cu-role').value = 'reseller';
+  document.getElementById('cu-approved').checked = true;
+  createUserModal.classList.add('open');
+});
+document.getElementById('cu-cancel-btn').addEventListener('click', () => createUserModal.classList.remove('open'));
+
+document.getElementById('cu-submit-btn').addEventListener('click', async () => {
+  const email = document.getElementById('cu-email').value.trim();
+  const business_name = document.getElementById('cu-business').value.trim() || null;
+  const password = document.getElementById('cu-password').value;
+  const role = document.getElementById('cu-role').value;
+  const approved = document.getElementById('cu-approved').checked;
+
+  createUserErr.style.display = 'none';
+  if (!email) { createUserErr.textContent = 'Email is required.'; createUserErr.style.display = 'block'; return; }
+  if (!password || password.length < 6) { createUserErr.textContent = 'Set a temporary password of at least 6 characters.'; createUserErr.style.display = 'block'; return; }
+
+  const btn = document.getElementById('cu-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+
+  try {
+    const { data, error } = await supabase.functions.invoke('admin-create-user', {
+      body: { email, password, business_name, role, approved }
+    });
+    if (error) throw error;
+    showToast('Account created for ' + email, 'success');
+    createUserModal.classList.remove('open');
+    loadApprovals();
+  } catch (err) {
+    console.error('Create user failed:', err);
+    createUserErr.textContent = 'Failed to create account: ' + (err?.message || err) + '. Make sure the admin-create-user Edge Function is deployed (see PORTAL-SETUP.md).';
+    createUserErr.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+});
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
   await supabase.auth.signOut();
