@@ -44,7 +44,10 @@ body { background: var(--offwhite); }
   <div style="text-align:center; max-width:420px; padding:2rem;">
     <h2 style="color:var(--forest); margin-bottom:0.75rem;" id="gate-title">Checking access…</h2>
     <p id="gate-message" style="color:var(--grey-600); font-size:0.9rem;"></p>
-    <a href="portal-login.html" class="btn btn-secondary" style="margin-top:1.5rem;">Back to Login</a>
+    <div style="margin-top:1.5rem; display:flex; gap:0.75rem; justify-content:center;">
+      <button id="gate-retry" class="btn btn-primary" style="display:none;" onclick="location.reload()">Try Again</button>
+      <a href="portal-login.html" class="btn btn-secondary">Back to Login</a>
+    </div>
   </div>
 </div>
 
@@ -103,11 +106,13 @@ const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABA
 const gate = document.getElementById('portal-gate');
 const gateTitle = document.getElementById('gate-title');
 const gateMsg = document.getElementById('gate-message');
+const gateRetry = document.getElementById('gate-retry');
 const app = document.getElementById('portal-app');
 
-function showGate(title, msg) {
+function showGate(title, msg, showRetry) {
   gateTitle.textContent = title;
   gateMsg.textContent = msg;
+  gateRetry.style.display = showRetry ? 'inline-flex' : 'none';
   gate.style.display = 'flex';
   app.style.display = 'none';
 }
@@ -125,7 +130,19 @@ async function init() {
     .eq('id', session.user.id)
     .single();
 
-  if (profileErr || !profile) {
+  if (profileErr) {
+    // PGRST116 = PostgREST's "no rows found" — that's a genuine missing
+    // profile. Anything else (5xx, network failure, etc.) is a transient
+    // service issue, not a real "no account" case — don't tell the user
+    // their account doesn't exist when it's actually just unreachable.
+    if (profileErr.code === 'PGRST116') {
+      showGate('Account Not Found', 'We could not find a portal profile for your account. Please contact us for assistance.');
+    } else {
+      showGate('Service Temporarily Unavailable', 'We couldn\'t reach the server just now (' + (profileErr.message || 'unknown error') + '). Please wait a moment and try again.', true);
+    }
+    return;
+  }
+  if (!profile) {
     showGate('Account Not Found', 'We could not find a portal profile for your account. Please contact us for assistance.');
     return;
   }
