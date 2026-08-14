@@ -109,10 +109,24 @@
       <button type="submit" id="login-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Sign In</button>
     </form>
 
-    <p class="portal-footnote">
+    <p class="portal-footnote" id="login-footnote">
       Forgot your password? <a href="#" id="reset-link">Reset it here</a>.<br>
       Not a stockist yet? <a href="contact.html">Apply for wholesale access</a>.
     </p>
+
+    <!-- Shown instead of the login form when arriving via a password-reset email link -->
+    <form id="recovery-form" method="post" action="javascript:void(0);" novalidate style="display:none;">
+      <p class="sub" style="margin-bottom:1.25rem;">Set a new password for your account below.</p>
+      <div class="form-group">
+        <label for="r-password">New Password</label>
+        <input type="password" id="r-password" name="password" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+      </div>
+      <div class="form-group">
+        <label for="r-password-confirm">Confirm New Password</label>
+        <input type="password" id="r-password-confirm" name="password-confirm" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+      </div>
+      <button type="submit" id="recovery-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Set New Password</button>
+    </form>
   </div>
 </div>
 
@@ -217,15 +231,64 @@ resetLink.addEventListener('click', async (e) => {
 });
 
 // Handle the "PASSWORD_RECOVERY" flow: user arrives back here via the emailed
-// link, already in a temporary authenticated state — prompt for a new password.
-supabase.auth.onAuthStateChange(async (event, session) => {
+// link, already in a temporary authenticated state — show an inline form to
+// set a new password instead of a browser popup (more reliable, better UX).
+const recoveryForm = document.getElementById('recovery-form');
+const recoveryBtn = document.getElementById('recovery-btn');
+const loginFootnote = document.getElementById('login-footnote');
+
+supabase.auth.onAuthStateChange((event) => {
   if (event === 'PASSWORD_RECOVERY') {
-    const newPassword = window.prompt('Enter a new password for your account:');
-    if (!newPassword) return;
+    form.style.display = 'none';
+    loginFootnote.style.display = 'none';
+    recoveryForm.style.display = 'block';
+  }
+});
+
+recoveryForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+  infoBox.style.display = 'none';
+
+  const newPassword = document.getElementById('r-password').value;
+  const confirmPassword = document.getElementById('r-password-confirm').value;
+
+  if (newPassword.length < 6) {
+    showError('Password must be at least 6 characters.');
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    showError('Passwords do not match.');
+    return;
+  }
+
+  recoveryBtn.disabled = true;
+  recoveryBtn.textContent = 'Saving…';
+
+  try {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) { showError(error.message); return; }
-    showInfo('Password updated — you can now sign in.');
+    recoveryBtn.disabled = false;
+    recoveryBtn.textContent = 'Set New Password';
+
+    if (error) {
+      showError(error.message);
+      showToast(error.message, 'error');
+      return;
+    }
+
+    showToast('Password updated — you can now sign in.', 'success');
     await supabase.auth.signOut();
+
+    recoveryForm.style.display = 'none';
+    form.style.display = 'block';
+    loginFootnote.style.display = 'block';
+    showInfo('Password updated — sign in below with your new password.');
+  } catch (err) {
+    recoveryBtn.disabled = false;
+    recoveryBtn.textContent = 'Set New Password';
+    console.error('Password update failed:', err);
+    showError('Something went wrong updating your password: ' + (err?.message || err));
+    showToast('Something went wrong updating your password', 'error');
   }
 });
 })();
