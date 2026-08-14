@@ -83,6 +83,61 @@ Supabase's built-in email sender is rate-limited and only meant for testing — 
 
 Until the domain is verified in Resend, sending will fail or emails may land in spam — verify the domain first before relying on this for real invites.
 
+## 7. Reseller ordering system (Purchase Order / Payment on Account)
+
+Adds `pages/portal-order.html` (place an order), `pages/portal-orders.html` (order history), and `pages/admin.html` (admin dashboard). No payment is processed — this is PO/Payment on Account only.
+
+1. Run `schema-orders.sql` in SQL Editor (after `schema.sql`/`populate.sql`). Creates `orders` and `order_items` tables, RLS so resellers only see their own orders and admins see everything, and lets admins update `profiles` too (needed for the approvals tab).
+2. **Make yourself an admin** — run in SQL Editor:
+   ```sql
+   update public.profiles set role = 'admin', approved = true
+   where email = 'your-admin-email@example.com';
+   ```
+3. Visit `/pages/admin.html` while signed in as that account — you'll see two tabs: **Orders** (every reseller's orders, click one to view line items and set status/shipping/internal notes) and **Pending Approvals** (approve new reseller signups with one click, instead of Table Editor).
+
+How it works for resellers: `portal-order.html` pulls live pricing from `wholesale_prices`, enforces each product's `min_order_qty`, calculates subtotal + 10% GST client-side, and shows shipping as "to be confirmed" (per your instruction — no shipping calculator, admin quotes it after submission). On submit it writes to `orders` + `order_items`. `portal-orders.html` shows the reseller their own order history and status.
+
+## 8. Zoho Inventory sync (optional, admin-triggered)
+
+The admin order detail view has a **"Sync to Zoho Inventory"** button that creates a matching Sales Order in Zoho via their API. This requires additional one-time setup — it won't work until you complete it.
+
+### 8a. Get Zoho API credentials
+
+1. Go to the [Zoho API Console](https://api-console.zoho.com) → **Add Client** → **Self Client** (simplest option for server-to-server use, no redirect URL needed).
+2. Note the **Client ID** and **Client Secret** it gives you.
+3. Under the **Generate Code** tab for that client, enter scope `ZohoInventory.salesorders.CREATE,ZohoInventory.contacts.READ,ZohoInventory.items.READ`, generate a code, and exchange it for a refresh token (Zoho's console walks you through this — the code is short-lived, the refresh token it produces is what you actually need and doesn't expire).
+4. Find your **Organization ID**: Zoho Inventory → Settings → Organization Profile.
+5. Note your **data center domain** — Australian accounts are typically `accounts.zoho.com.au` (accounts) and `www.zohoapis.com.au` (API), but check what your Zoho account actually uses (visible in the URL when logged into Zoho Inventory).
+
+### 8b. Deploy the Edge Function
+
+The function code lives in `supabase/functions/zoho-sync-order/index.ts`. You'll need the [Supabase CLI](https://supabase.com/docs/guides/cli) installed locally:
+
+```bash
+supabase login
+supabase link --project-ref your-project-ref
+supabase functions deploy zoho-sync-order
+
+supabase secrets set ZOHO_CLIENT_ID=your_client_id
+supabase secrets set ZOHO_CLIENT_SECRET=your_client_secret
+supabase secrets set ZOHO_REFRESH_TOKEN=your_refresh_token
+supabase secrets set ZOHO_ORGANIZATION_ID=your_org_id
+supabase secrets set ZOHO_ACCOUNTS_DOMAIN=accounts.zoho.com.au
+supabase secrets set ZOHO_API_DOMAIN=www.zohoapis.com.au
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+The service role key is in Supabase → Project Settings → API — this is the one that must stay private, which is why it's only ever set as a server-side secret, never in any client-facing file in this repo.
+
+### 8c. Link resellers and products to Zoho
+
+Run `schema-zoho.sql` in SQL Editor first (adds two columns). Then, before syncing will work for a given order:
+
+- **Per reseller:** `update public.profiles set zoho_contact_id = '...' where email = '...';` — find the Contact ID in Zoho Inventory → Contacts.
+- **Per product:** `update public.wholesale_prices set zoho_item_id = '...' where sku = '...';` — find the Item ID in Zoho Inventory → Items.
+
+If either is missing when an admin clicks "Sync to Zoho," the function fails with a clear message telling you exactly what's missing rather than partially syncing.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.

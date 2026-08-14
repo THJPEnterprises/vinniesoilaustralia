@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Vinnie's Oil Australia</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+body { background: var(--offwhite); }
+#portal-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.portal-topbar {
+  background: var(--ink); color: #fff; padding: 1rem 5vw;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.portal-topbar .p-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+.portal-topbar .p-brand img { height: 30px; }
+.portal-topbar .p-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 1rem; }
+.portal-topbar .p-user button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; }
+.portal-topbar .p-user button:hover { background: rgba(255,255,255,0.1); }
+.portal-body { max-width: 1200px; margin: 0 auto; padding: 3rem 5vw 5rem; }
+
+.orders-grid { display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; align-items: start; }
+.orders-list-panel { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; overflow: hidden; max-height: 75vh; overflow-y: auto; }
+.order-row { padding: 1rem 1.25rem; border-bottom: 1px solid var(--grey-200); cursor: pointer; }
+.order-row:hover { background: var(--offwhite); }
+.order-row.active { background: rgba(74,103,65,0.08); border-left: 3px solid var(--moss); }
+.order-row-top { display: flex; justify-content: space-between; align-items: center; }
+.order-row-po { font-weight: 700; font-size: 0.85rem; color: var(--forest); }
+.order-row-biz { font-size: 0.78rem; color: var(--grey-600); margin-top: 2px; }
+.order-row-date { font-size: 0.7rem; color: var(--grey-400); margin-top: 4px; }
+
+.order-detail-panel { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 2rem; min-height: 400px; }
+.detail-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.85rem; }
+.detail-items-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 1rem 0; }
+.detail-items-table th { text-align: left; padding: 6px 10px; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey-400); border-bottom: 1px solid var(--grey-200); }
+.detail-items-table td { padding: 8px 10px; border-bottom: 1px solid var(--grey-200); }
+.admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.approval-card { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: #fff; border: 1px solid var(--grey-200); border-radius: 8px; margin-bottom: 0.75rem; }
+.approval-card .biz { font-weight: 600; color: var(--forest); font-size: 0.88rem; }
+.approval-card .email { font-size: 0.78rem; color: var(--grey-600); }
+
+#toast-stack {
+  position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 500;
+  display: flex; flex-direction: column; gap: 0.6rem; align-items: center; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px; padding: 0.85rem 1.25rem; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 600; box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  opacity: 0; transform: translateY(-12px); transition: opacity 0.25s ease, transform 0.25s ease; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { background: var(--moss); color: #fff; }
+.toast-error { background: #c8460a; color: #fff; }
+
+@media (max-width: 900px) { .orders-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="toast-stack"></div>
+
+<div id="portal-gate" style="display:none;">
+  <div style="text-align:center; max-width:420px; padding:2rem;">
+    <h2 style="color:var(--forest); margin-bottom:0.75rem;" id="gate-title">Checking access…</h2>
+    <p id="gate-message" style="color:var(--grey-600); font-size:0.9rem;"></p>
+    <a href="portal-login.html" class="btn btn-secondary" style="margin-top:1.5rem;">Back to Login</a>
+  </div>
+</div>
+
+<div id="portal-app" style="display:none;">
+  <div class="portal-topbar">
+    <div class="p-brand">
+      <img src="../images/Vinnies Oil Australia Logo.png" alt="">
+      Admin Dashboard
+    </div>
+    <div class="p-user">
+      <span id="user-email"></span>
+      <button id="logout-btn">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="portal-body">
+    <div class="tab-nav" data-tabs>
+      <button class="tab-btn active" data-tab="orders">Orders</button>
+      <button class="tab-btn" data-tab="approvals">Pending Approvals <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
+    </div>
+
+    <div class="tab-panel active" data-panel="orders">
+      <div class="orders-grid">
+        <div class="orders-list-panel" id="orders-list-panel">
+          <p style="padding:1.25rem; color:var(--grey-400); font-size:0.85rem;">Loading orders…</p>
+        </div>
+        <div class="order-detail-panel" id="order-detail-panel">
+          <p style="color:var(--grey-400); font-size:0.9rem;">Select an order from the list to view details.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="approvals">
+      <div id="approvals-list">
+        <p style="color:var(--grey-400); font-size:0.85rem;">Loading…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/shared.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
+<script>
+(function () {
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+const gate = document.getElementById('portal-gate');
+const gateTitle = document.getElementById('gate-title');
+const gateMsg = document.getElementById('gate-message');
+const app = document.getElementById('portal-app');
+
+function showGate(title, msg) {
+  gateTitle.textContent = title;
+  gateMsg.textContent = msg;
+  gate.style.display = 'flex';
+  app.style.display = 'none';
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+const toastStack = document.getElementById('toast-stack');
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + (type === 'error' ? 'error' : 'success');
+  toast.textContent = msg;
+  toastStack.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4500);
+}
+
+const STATUS_OPTIONS = ['submitted', 'confirmed', 'processing', 'shipped', 'cancelled'];
+let allOrders = [];
+let allProfiles = {};
+let selectedOrderId = null;
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'portal-login.html'; return; }
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('approved, role, business_name, email')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profileErr) {
+    if (profileErr.code === 'PGRST116') {
+      showGate('Account Not Found', 'We could not find a portal profile for your account.');
+    } else {
+      showGate('Service Temporarily Unavailable', 'We couldn\'t reach the server just now. Please wait a moment and try again.');
+    }
+    return;
+  }
+  if (profile.role !== 'admin') {
+    showGate('Admin Access Required', 'This area is restricted to Vinnie\'s Oil Australia admin accounts.');
+    return;
+  }
+
+  document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
+  app.style.display = 'block';
+  gate.style.display = 'none';
+
+  loadOrders();
+  loadApprovals();
+}
+
+async function loadOrders() {
+  const panel = document.getElementById('orders-list-panel');
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    panel.innerHTML = '<p style="padding:1.25rem; color:#a13a00; font-size:0.85rem;">Unable to load orders.</p>';
+    return;
+  }
+  allOrders = orders || [];
+
+  if (allOrders.length === 0) {
+    panel.innerHTML = '<p style="padding:1.25rem; color:var(--grey-400); font-size:0.85rem;">No orders yet.</p>';
+    return;
+  }
+
+  const resellerIds = [...new Set(allOrders.map(o => o.reseller_id))];
+  const { data: profiles } = await supabase.from('profiles').select('id, business_name, email').in('id', resellerIds);
+  (profiles || []).forEach(p => { allProfiles[p.id] = p; });
+
+  panel.innerHTML = allOrders.map(o => {
+    const biz = allProfiles[o.reseller_id];
+    return `
+      <div class="order-row" data-order-id="${o.id}">
+        <div class="order-row-top">
+          <span class="order-row-po">PO ${escapeHtml(o.po_number)}</span>
+          <span class="badge badge-amber">${escapeHtml(o.status)}</span>
+        </div>
+        <div class="order-row-biz">${escapeHtml(biz?.business_name || biz?.email || 'Unknown')}</div>
+        <div class="order-row-date">${new Date(o.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+      </div>`;
+  }).join('');
+
+  document.querySelectorAll('.order-row').forEach(row => {
+    row.addEventListener('click', () => selectOrder(Number(row.dataset.orderId)));
+  });
+}
+
+async function selectOrder(orderId) {
+  selectedOrderId = orderId;
+  document.querySelectorAll('.order-row').forEach(r => r.classList.toggle('active', Number(r.dataset.orderId) === orderId));
+
+  const order = allOrders.find(o => o.id === orderId);
+  const detail = document.getElementById('order-detail-panel');
+  detail.innerHTML = '<p style="color:var(--grey-400);">Loading…</p>';
+
+  const { data: items } = await supabase.from('order_items').select('*').eq('order_id', orderId);
+  const biz = allProfiles[order.reseller_id];
+  const grandTotal = Number(order.subtotal_aud) + Number(order.gst_aud) + Number(order.shipping_aud || 0);
+
+  detail.innerHTML = `
+    <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">PO ${escapeHtml(order.po_number)}</h2>
+    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:1.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')}</p>
+
+    <table class="detail-items-table">
+      <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+      <tbody>
+        ${(items || []).map(i => `<tr><td>${escapeHtml(i.product_name)}</td><td>${i.qty}</td><td>$${Number(i.unit_price_aud).toFixed(2)}</td><td>$${Number(i.line_total_aud).toFixed(2)}</td></tr>`).join('')}
+      </tbody>
+    </table>
+
+    <div class="detail-row"><span>Subtotal</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
+    <div class="detail-row"><span>GST</span><span>$${Number(order.gst_aud).toFixed(2)}</span></div>
+    <div class="detail-row" style="font-weight:700; color:var(--forest); border-top:1px solid var(--grey-200); padding-top:0.5rem; margin-top:0.25rem;"><span>Total</span><span>$${grandTotal.toFixed(2)}</span></div>
+
+    ${order.notes ? `<p style="font-size:0.82rem; color:var(--grey-600); margin-top:1rem;"><strong>Reseller notes:</strong> ${escapeHtml(order.notes)}</p>` : ''}
+
+    <hr class="divider">
+
+    <div class="admin-form-row">
+      <div class="form-group">
+        <label for="admin-status">Status</label>
+        <select id="admin-status">${STATUS_OPTIONS.map(s => `<option value="${s}" ${s === order.status ? 'selected' : ''}>${s}</option>`).join('')}</select>
+      </div>
+      <div class="form-group">
+        <label for="admin-shipping">Shipping Cost (AUD)</label>
+        <input type="number" step="0.01" min="0" id="admin-shipping" value="${order.shipping_aud ?? ''}" placeholder="Not yet set">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="admin-notes">Internal Notes (not shown to reseller)</label>
+      <textarea id="admin-notes">${escapeHtml(order.admin_notes || '')}</textarea>
+    </div>
+    <button id="save-order-btn" class="btn btn-primary" style="margin-bottom:1.5rem;">Save Changes</button>
+
+    <hr class="divider">
+
+    <h3 style="font-size:0.95rem; color:var(--forest); margin-bottom:0.75rem;">Zoho Inventory Sync</h3>
+    <div class="detail-row"><span>Sync status</span><span class="badge ${order.zoho_sync_status === 'synced' ? 'badge-green' : order.zoho_sync_status === 'failed' ? 'badge-amber' : 'badge-dark'}">${escapeHtml(order.zoho_sync_status || 'not_synced')}</span></div>
+    ${order.zoho_sales_order_id ? `<div class="detail-row"><span>Zoho Sales Order #</span><span>${escapeHtml(order.zoho_sales_order_id)}</span></div>` : ''}
+    ${order.zoho_sync_error ? `<p style="font-size:0.78rem; color:#a13a00; margin-top:0.5rem;">${escapeHtml(order.zoho_sync_error)}</p>` : ''}
+    <button id="zoho-sync-btn" class="btn btn-secondary" style="margin-top:0.75rem;">Sync to Zoho Inventory</button>
+  `;
+
+  document.getElementById('save-order-btn').addEventListener('click', () => saveOrder(orderId));
+  document.getElementById('zoho-sync-btn').addEventListener('click', () => syncToZoho(orderId));
+}
+
+async function saveOrder(orderId) {
+  const status = document.getElementById('admin-status').value;
+  const shippingVal = document.getElementById('admin-shipping').value;
+  const shipping = shippingVal === '' ? null : Number(shippingVal);
+  const adminNotes = document.getElementById('admin-notes').value.trim() || null;
+
+  const btn = document.getElementById('save-order-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const { error } = await supabase
+    .from('orders')
+    .update({ status, shipping_aud: shipping, admin_notes: adminNotes, updated_at: new Date().toISOString() })
+    .eq('id', orderId);
+
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  if (error) {
+    showToast('Failed to save: ' + error.message, 'error');
+    return;
+  }
+  showToast('Order updated', 'success');
+  await loadOrders();
+  selectOrder(orderId);
+}
+
+async function syncToZoho(orderId) {
+  const btn = document.getElementById('zoho-sync-btn');
+  btn.disabled = true;
+  btn.textContent = 'Syncing…';
+
+  try {
+    const { data, error } = await supabase.functions.invoke('zoho-sync-order', {
+      body: { order_id: orderId }
+    });
+    if (error) throw error;
+    showToast('Synced to Zoho — Sales Order ' + (data?.zoho_sales_order_id || ''), 'success');
+  } catch (err) {
+    console.error('Zoho sync failed:', err);
+    showToast('Zoho sync failed: ' + (err?.message || err) + '. See PORTAL-SETUP.md to finish Zoho setup.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sync to Zoho Inventory';
+    await loadOrders();
+    selectOrder(orderId);
+  }
+}
+
+async function loadApprovals() {
+  const list = document.getElementById('approvals-list');
+  const { data: pending, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('approved', false)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = '<p style="color:#a13a00; font-size:0.85rem;">Unable to load pending approvals.</p>';
+    return;
+  }
+
+  const countBadge = document.getElementById('approval-count');
+  if (pending && pending.length > 0) {
+    countBadge.textContent = pending.length;
+    countBadge.style.display = 'inline-block';
+  }
+
+  if (!pending || pending.length === 0) {
+    list.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">No accounts awaiting approval.</p>';
+    return;
+  }
+
+  list.innerHTML = pending.map(p => `
+    <div class="approval-card" data-id="${p.id}">
+      <div>
+        <div class="biz">${escapeHtml(p.business_name || 'No business name set')}</div>
+        <div class="email">${escapeHtml(p.email)}</div>
+      </div>
+      <button class="btn btn-primary btn-sm approve-btn" data-id="${p.id}">Approve</button>
+    </div>`).join('');
+
+  document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Approving…';
+      const { error } = await supabase.from('profiles').update({ approved: true }).eq('id', btn.dataset.id);
+      if (error) {
+        showToast('Failed to approve: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Approve';
+        return;
+      }
+      showToast('Account approved', 'success');
+      loadApprovals();
+    });
+  });
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'portal-login.html';
+});
+
+init();
+})();
+</script>
+</body>
+</html>

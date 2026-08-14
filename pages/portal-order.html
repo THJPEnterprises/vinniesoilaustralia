@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Place an Order — Vinnie's Oil Australia Reseller Portal</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+body { background: var(--offwhite); }
+#portal-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.portal-topbar {
+  background: var(--forest); color: #fff; padding: 1rem 5vw;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.portal-topbar .p-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+.portal-topbar .p-brand img { height: 30px; }
+.portal-topbar .p-nav { display: flex; align-items: center; gap: 1.5rem; font-size: 0.82rem; }
+.portal-topbar .p-nav a { color: rgba(255,255,255,0.75); }
+.portal-topbar .p-nav a:hover { color: #fff; }
+.portal-topbar .p-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 1rem; }
+.portal-topbar .p-user button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; }
+.portal-topbar .p-user button:hover { background: rgba(255,255,255,0.1); }
+.portal-body { max-width: 1000px; margin: 0 auto; padding: 3rem 5vw 6rem; }
+.portal-section { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 2rem; margin-bottom: 1.5rem; }
+.portal-section h2 { font-size: 1.15rem; color: var(--forest); margin-bottom: 0.4rem; }
+.portal-section .section-note { font-size: 0.82rem; color: var(--grey-600); margin-bottom: 1.5rem; }
+
+.order-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.order-table th { background: var(--forest); color: rgba(255,255,255,0.85); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 14px; text-align: left; }
+.order-table td { padding: 10px 14px; border-bottom: 1px solid var(--grey-200); color: var(--grey-800); vertical-align: middle; }
+.order-table tr:hover td { background: var(--offwhite); }
+.qty-input { width: 70px; padding: 6px 8px; border: 1.5px solid var(--grey-200); border-radius: 5px; font-family: var(--font-sans); font-size: 0.85rem; text-align: center; }
+.qty-input.invalid { border-color: #c8460a; background: rgba(200,60,10,0.05); }
+.moq-note { font-size: 0.7rem; color: var(--grey-400); margin-top: 2px; }
+.moq-note.invalid { color: #c8460a; font-weight: 600; }
+.line-total { font-weight: 600; color: var(--forest); }
+
+.order-summary { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
+.order-summary-box { width: 100%; max-width: 320px; }
+.order-summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.88rem; color: var(--grey-800); }
+.order-summary-row.total { border-top: 1.5px solid var(--grey-200); margin-top: 0.4rem; padding-top: 0.75rem; font-weight: 700; font-size: 1.05rem; color: var(--forest); }
+.order-summary-row .label-note { font-size: 0.72rem; color: var(--grey-400); display: block; margin-top: 2px; }
+
+#toast-stack {
+  position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 500;
+  display: flex; flex-direction: column; gap: 0.6rem; align-items: center; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px; padding: 0.85rem 1.25rem; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 600; box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  opacity: 0; transform: translateY(-12px); transition: opacity 0.25s ease, transform 0.25s ease; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { background: var(--moss); color: #fff; }
+.toast-error { background: #c8460a; color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="toast-stack"></div>
+
+<div id="portal-gate" style="display:none;">
+  <div style="text-align:center; max-width:420px; padding:2rem;">
+    <h2 style="color:var(--forest); margin-bottom:0.75rem;" id="gate-title">Checking access…</h2>
+    <p id="gate-message" style="color:var(--grey-600); font-size:0.9rem;"></p>
+    <a href="portal-login.html" class="btn btn-secondary" style="margin-top:1.5rem;">Back to Login</a>
+  </div>
+</div>
+
+<div id="portal-app" style="display:none;">
+  <div class="portal-topbar">
+    <div class="p-brand">
+      <img src="../images/Vinnies Oil Australia Logo.png" alt="">
+      Reseller Portal
+    </div>
+    <div class="p-nav">
+      <a href="portal.html">Dashboard</a>
+      <a href="portal-order.html" style="color:#fff; font-weight:600;">Place an Order</a>
+      <a href="portal-orders.html">My Orders</a>
+    </div>
+    <div class="p-user">
+      <span id="user-email"></span>
+      <button id="logout-btn">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="portal-body">
+    <h1 style="color:var(--forest); font-size:1.6rem; margin-bottom:0.4rem;">Place an Order</h1>
+    <p style="color:var(--grey-600); font-size:0.88rem; margin-bottom:2rem;">Purchase Order / Payment on Account — no payment is taken here. Your order is submitted to our team for processing and invoicing.</p>
+
+    <div class="portal-section">
+      <h2>Products</h2>
+      <p class="section-note">Enter a quantity for each product you'd like to order. Each product has its own minimum order quantity — you'll see a warning if you're under it.</p>
+      <div style="overflow-x:auto;">
+        <table class="order-table" id="order-table">
+          <thead>
+            <tr><th>Product</th><th>Size</th><th>Wholesale (AUD)</th><th>Min Order</th><th>Quantity</th><th>Line Total</th></tr>
+          </thead>
+          <tbody id="order-table-body">
+            <tr><td colspan="6" style="color:var(--grey-400);">Loading products…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="order-summary">
+        <div class="order-summary-box">
+          <div class="order-summary-row"><span>Subtotal</span><span id="sum-subtotal">$0.00</span></div>
+          <div class="order-summary-row"><span>GST (10%)</span><span id="sum-gst">$0.00</span></div>
+          <div class="order-summary-row"><span>Shipping<span class="label-note">Confirmed by our team after submission</span></span><span>TBC</span></div>
+          <div class="order-summary-row total"><span>Total (excl. shipping)</span><span id="sum-total">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <h2>Order Details</h2>
+      <div class="form-group">
+        <label for="po-number">Your Purchase Order Number *</label>
+        <input type="text" id="po-number" placeholder="e.g. PO-10234" required>
+      </div>
+      <div class="form-group">
+        <label for="order-notes">Notes (optional)</label>
+        <textarea id="order-notes" placeholder="Delivery instructions, requested dates, anything else we should know…"></textarea>
+      </div>
+
+      <div id="order-error" style="display:none; background: rgba(200,60,10,0.08); color:#a13a00; border-left:3px solid #c8460a; padding: 0.75rem 1rem; border-radius:6px; font-size:0.85rem; margin-bottom:1.25rem;"></div>
+
+      <button id="submit-order-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Submit Order</button>
+      <p class="form-note" style="margin-top:1rem;">By submitting, you confirm this order will be invoiced to your account on file with the PO number above. Our team will confirm shipping cost and delivery timing separately.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
+<script>
+(function () {
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+const gate = document.getElementById('portal-gate');
+const gateTitle = document.getElementById('gate-title');
+const gateMsg = document.getElementById('gate-message');
+const app = document.getElementById('portal-app');
+const errBox = document.getElementById('order-error');
+
+function showGate(title, msg) {
+  gateTitle.textContent = title;
+  gateMsg.textContent = msg;
+  gate.style.display = 'flex';
+  app.style.display = 'none';
+}
+function showError(msg) {
+  errBox.textContent = msg;
+  errBox.style.display = 'block';
+}
+
+const toastStack = document.getElementById('toast-stack');
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + (type === 'error' ? 'error' : 'success');
+  toast.textContent = msg;
+  toastStack.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
+let currentUserId = null;
+let products = [];
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'portal-login.html'; return; }
+  currentUserId = session.user.id;
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('approved, business_name, email')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profileErr) {
+    if (profileErr.code === 'PGRST116') {
+      showGate('Account Not Found', 'We could not find a portal profile for your account. Please contact us for assistance.');
+    } else {
+      showGate('Service Temporarily Unavailable', 'We couldn\'t reach the server just now. Please wait a moment and try again.');
+    }
+    return;
+  }
+  if (!profile.approved) {
+    showGate('Access Pending Approval', 'Your account is awaiting approval from our team before you can place orders.');
+    return;
+  }
+
+  document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
+  app.style.display = 'block';
+  gate.style.display = 'none';
+
+  loadProducts();
+}
+
+async function loadProducts() {
+  const body = document.getElementById('order-table-body');
+  const { data, error } = await supabase
+    .from('wholesale_prices')
+    .select('*')
+    .order('product_name', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" style="color:var(--grey-400);">No products available to order right now.</td></tr>';
+    return;
+  }
+
+  products = data;
+  body.innerHTML = products.map(p => `
+    <tr data-sku="${p.sku}">
+      <td>${p.product_name}</td>
+      <td>${p.size ?? '—'}</td>
+      <td>$${Number(p.wholesale_price_aud ?? 0).toFixed(2)}</td>
+      <td>${p.min_order_qty ?? 1}</td>
+      <td>
+        <input type="number" min="0" step="1" value="0" class="qty-input" data-sku="${p.sku}">
+        <div class="moq-note" data-sku-note="${p.sku}"></div>
+      </td>
+      <td class="line-total" data-sku-total="${p.sku}">$0.00</td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('input', recalculate);
+  });
+  recalculate();
+}
+
+function recalculate() {
+  let subtotal = 0;
+  let hasInvalid = false;
+  let hasAnyItem = false;
+
+  products.forEach(p => {
+    const input = document.querySelector('.qty-input[data-sku="' + cssEscape(p.sku) + '"]');
+    if (!input) return;
+    const qty = Math.max(0, parseInt(input.value, 10) || 0);
+    const moq = p.min_order_qty ?? 1;
+    const noteEl = document.querySelector('[data-sku-note="' + cssEscape(p.sku) + '"]');
+    const totalEl = document.querySelector('[data-sku-total="' + cssEscape(p.sku) + '"]');
+    const lineTotal = qty * Number(p.wholesale_price_aud ?? 0);
+
+    if (qty > 0 && qty < moq) {
+      input.classList.add('invalid');
+      noteEl.textContent = 'Minimum order is ' + moq;
+      noteEl.classList.add('invalid');
+      hasInvalid = true;
+    } else {
+      input.classList.remove('invalid');
+      noteEl.textContent = '';
+      noteEl.classList.remove('invalid');
+    }
+
+    if (qty > 0) { hasAnyItem = true; subtotal += lineTotal; }
+    totalEl.textContent = '$' + lineTotal.toFixed(2);
+  });
+
+  const gst = subtotal * 0.10;
+  const total = subtotal + gst;
+
+  document.getElementById('sum-subtotal').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('sum-gst').textContent = '$' + gst.toFixed(2);
+  document.getElementById('sum-total').textContent = '$' + total.toFixed(2);
+
+  const submitBtn = document.getElementById('submit-order-btn');
+  submitBtn.disabled = hasInvalid || !hasAnyItem;
+  submitBtn.style.opacity = submitBtn.disabled ? '0.5' : '1';
+  submitBtn.style.cursor = submitBtn.disabled ? 'not-allowed' : 'pointer';
+
+  return { subtotal, gst, total, hasInvalid, hasAnyItem };
+}
+
+function cssEscape(str) {
+  return String(str).replace(/["\\]/g, '\\$&');
+}
+
+document.getElementById('submit-order-btn').addEventListener('click', async () => {
+  errBox.style.display = 'none';
+  const { subtotal, gst, hasInvalid, hasAnyItem } = recalculate();
+
+  const poNumber = document.getElementById('po-number').value.trim();
+  if (!poNumber) { showError('Enter your Purchase Order number before submitting.'); return; }
+  if (hasInvalid) { showError('One or more products are below their minimum order quantity.'); return; }
+  if (!hasAnyItem) { showError('Add a quantity for at least one product.'); return; }
+
+  const items = products
+    .map(p => {
+      const input = document.querySelector('.qty-input[data-sku="' + cssEscape(p.sku) + '"]');
+      const qty = Math.max(0, parseInt(input.value, 10) || 0);
+      return qty > 0 ? {
+        sku: p.sku,
+        product_name: p.product_name,
+        unit_price_aud: p.wholesale_price_aud,
+        qty,
+        line_total_aud: qty * Number(p.wholesale_price_aud ?? 0)
+      } : null;
+    })
+    .filter(Boolean);
+
+  const submitBtn = document.getElementById('submit-order-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting…';
+
+  try {
+    const { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert({
+        reseller_id: currentUserId,
+        po_number: poNumber,
+        subtotal_aud: subtotal,
+        gst_aud: gst,
+        notes: document.getElementById('order-notes').value.trim() || null
+      })
+      .select()
+      .single();
+
+    if (orderErr) throw orderErr;
+
+    const itemsWithOrderId = items.map(i => ({ ...i, order_id: order.id }));
+    const { error: itemsErr } = await supabase.from('order_items').insert(itemsWithOrderId);
+    if (itemsErr) throw itemsErr;
+
+    showToast('Order submitted — PO ' + poNumber, 'success');
+    setTimeout(() => { window.location.href = 'portal-orders.html'; }, 1200);
+  } catch (err) {
+    console.error('Order submission failed:', err);
+    showError('Something went wrong submitting your order: ' + (err?.message || err));
+    showToast('Order submission failed', 'error');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Order';
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'portal-login.html';
+});
+
+init();
+})();
+</script>
+</body>
+</html>

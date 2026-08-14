@@ -14,6 +14,9 @@ body { background: var(--offwhite); }
 }
 .portal-topbar .p-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
 .portal-topbar .p-brand img { height: 30px; }
+.portal-topbar .p-nav { display: flex; align-items: center; gap: 1.5rem; font-size: 0.82rem; }
+.portal-topbar .p-nav a { color: rgba(255,255,255,0.75); }
+.portal-topbar .p-nav a:hover { color: #fff; }
 .portal-topbar .p-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 1rem; }
 .portal-topbar .p-user button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; }
 .portal-topbar .p-user button:hover { background: rgba(255,255,255,0.1); }
@@ -57,6 +60,11 @@ body { background: var(--offwhite); }
       <img src="../images/Vinnies Oil Australia Logo.png" alt="">
       Reseller Portal
     </div>
+    <div class="p-nav">
+      <a href="portal.html" style="color:#fff; font-weight:600;">Dashboard</a>
+      <a href="portal-order.html">Place an Order</a>
+      <a href="portal-orders.html">My Orders</a>
+    </div>
     <div class="p-user">
       <span id="user-email"></span>
       <button id="logout-btn">Sign Out</button>
@@ -65,7 +73,15 @@ body { background: var(--offwhite); }
 
   <div class="portal-body">
     <div class="badge badge-green" style="margin-bottom:1rem;">Wholesale Account</div>
-    <h1 style="color:var(--forest); font-size:1.8rem; margin-bottom:2rem;">Welcome back</h1>
+    <h1 style="color:var(--forest); font-size:1.8rem; margin-bottom:1.5rem;">Welcome back</h1>
+
+    <div class="highlight-block" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+      <div>
+        <h3 style="margin-bottom:0.25rem;">Ready to order?</h3>
+        <p style="margin:0;">Place a Purchase Order — no payment required here, we'll invoice your account.</p>
+      </div>
+      <a href="portal-order.html" class="btn btn-primary">Place an Order</a>
+    </div>
 
     <div class="portal-section">
       <h2>Wholesale Price List</h2>

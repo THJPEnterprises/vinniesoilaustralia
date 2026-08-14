@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>My Orders — Vinnie's Oil Australia Reseller Portal</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+body { background: var(--offwhite); }
+#portal-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.portal-topbar {
+  background: var(--forest); color: #fff; padding: 1rem 5vw;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.portal-topbar .p-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+.portal-topbar .p-brand img { height: 30px; }
+.portal-topbar .p-nav { display: flex; align-items: center; gap: 1.5rem; font-size: 0.82rem; }
+.portal-topbar .p-nav a { color: rgba(255,255,255,0.75); }
+.portal-topbar .p-nav a:hover { color: #fff; }
+.portal-topbar .p-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 1rem; }
+.portal-topbar .p-user button { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; }
+.portal-topbar .p-user button:hover { background: rgba(255,255,255,0.1); }
+.portal-body { max-width: 1000px; margin: 0 auto; padding: 3rem 5vw 5rem; }
+.order-card { background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; margin-bottom: 1.25rem; overflow: hidden; }
+.order-card-head { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; flex-wrap: wrap; gap: 0.75rem; cursor: pointer; }
+.order-card-head:hover { background: var(--offwhite); }
+.order-card-po { font-weight: 700; color: var(--forest); font-size: 0.95rem; }
+.order-card-date { font-size: 0.75rem; color: var(--grey-400); margin-top: 2px; }
+.order-card-total { font-weight: 700; color: var(--forest); font-size: 1rem; }
+.order-card-body { display: none; padding: 0 1.5rem 1.5rem; border-top: 1px solid var(--grey-200); }
+.order-card-body.open { display: block; }
+.order-items-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 1rem; }
+.order-items-table th { text-align: left; padding: 6px 10px; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey-400); border-bottom: 1px solid var(--grey-200); }
+.order-items-table td { padding: 8px 10px; border-bottom: 1px solid var(--grey-200); }
+.order-totals { margin-top: 1rem; font-size: 0.85rem; }
+.order-totals-row { display: flex; justify-content: space-between; padding: 0.3rem 0; max-width: 280px; margin-left: auto; }
+.order-totals-row.total { font-weight: 700; color: var(--forest); border-top: 1px solid var(--grey-200); padding-top: 0.5rem; margin-top: 0.3rem; }
+</style>
+</head>
+<body>
+
+<div id="portal-gate" style="display:none;">
+  <div style="text-align:center; max-width:420px; padding:2rem;">
+    <h2 style="color:var(--forest); margin-bottom:0.75rem;" id="gate-title">Checking access…</h2>
+    <p id="gate-message" style="color:var(--grey-600); font-size:0.9rem;"></p>
+    <a href="portal-login.html" class="btn btn-secondary" style="margin-top:1.5rem;">Back to Login</a>
+  </div>
+</div>
+
+<div id="portal-app" style="display:none;">
+  <div class="portal-topbar">
+    <div class="p-brand">
+      <img src="../images/Vinnies Oil Australia Logo.png" alt="">
+      Reseller Portal
+    </div>
+    <div class="p-nav">
+      <a href="portal.html">Dashboard</a>
+      <a href="portal-order.html">Place an Order</a>
+      <a href="portal-orders.html" style="color:#fff; font-weight:600;">My Orders</a>
+    </div>
+    <div class="p-user">
+      <span id="user-email"></span>
+      <button id="logout-btn">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="portal-body">
+    <h1 style="color:var(--forest); font-size:1.6rem; margin-bottom:0.4rem;">My Orders</h1>
+    <p style="color:var(--grey-600); font-size:0.88rem; margin-bottom:2rem;">Order status and shipping cost are updated by our team as your order is processed.</p>
+
+    <div id="orders-list">
+      <p style="color:var(--grey-400); font-size:0.85rem;">Loading orders…</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
+<script>
+(function () {
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+const gate = document.getElementById('portal-gate');
+const gateTitle = document.getElementById('gate-title');
+const gateMsg = document.getElementById('gate-message');
+const app = document.getElementById('portal-app');
+
+function showGate(title, msg) {
+  gateTitle.textContent = title;
+  gateMsg.textContent = msg;
+  gate.style.display = 'flex';
+  app.style.display = 'none';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+const STATUS_LABELS = {
+  submitted: 'Submitted',
+  confirmed: 'Confirmed',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  cancelled: 'Cancelled'
+};
+const STATUS_BADGE = {
+  submitted: 'badge-amber',
+  confirmed: 'badge-blue',
+  processing: 'badge-blue',
+  shipped: 'badge-green',
+  cancelled: 'badge-dark'
+};
+
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'portal-login.html'; return; }
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('approved, business_name, email')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profileErr) {
+    if (profileErr.code === 'PGRST116') {
+      showGate('Account Not Found', 'We could not find a portal profile for your account. Please contact us for assistance.');
+    } else {
+      showGate('Service Temporarily Unavailable', 'We couldn\'t reach the server just now. Please wait a moment and try again.');
+    }
+    return;
+  }
+  if (!profile.approved) {
+    showGate('Access Pending Approval', 'Your account is awaiting approval from our team.');
+    return;
+  }
+
+  document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
+  app.style.display = 'block';
+  gate.style.display = 'none';
+
+  loadOrders();
+}
+
+async function loadOrders() {
+  const list = document.getElementById('orders-list');
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = '<p style="color:#a13a00; font-size:0.85rem;">Unable to load your orders right now.</p>';
+    return;
+  }
+  if (!orders || orders.length === 0) {
+    list.innerHTML = '<p style="color:var(--grey-400); font-size:0.85rem;">You haven\'t placed any orders yet. <a href="portal-order.html" style="color:var(--pine);">Place your first order →</a></p>';
+    return;
+  }
+
+  const { data: allItems } = await supabase
+    .from('order_items')
+    .select('*')
+    .in('order_id', orders.map(o => o.id));
+
+  list.innerHTML = '';
+  orders.forEach(order => {
+    const items = (allItems || []).filter(i => i.order_id === order.id);
+    const shippingText = order.shipping_aud != null ? '$' + Number(order.shipping_aud).toFixed(2) : 'To be confirmed';
+    const grandTotal = Number(order.subtotal_aud) + Number(order.gst_aud) + Number(order.shipping_aud || 0);
+    const badgeClass = STATUS_BADGE[order.status] || 'badge-dark';
+    const statusLabel = STATUS_LABELS[order.status] || order.status;
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <div class="order-card-head" data-toggle="${order.id}">
+        <div>
+          <div class="order-card-po">PO ${escapeHtml(order.po_number)}</div>
+          <div class="order-card-date">${new Date(order.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+        </div>
+        <span class="badge ${badgeClass}">${statusLabel}</span>
+        <div class="order-card-total">$${grandTotal.toFixed(2)}${order.shipping_aud == null ? ' + shipping' : ''}</div>
+      </div>
+      <div class="order-card-body" id="order-body-${order.id}">
+        <table class="order-items-table">
+          <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+          <tbody>
+            ${items.map(i => `<tr><td>${escapeHtml(i.product_name)}</td><td>${i.qty}</td><td>$${Number(i.unit_price_aud).toFixed(2)}</td><td>$${Number(i.line_total_aud).toFixed(2)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="order-totals">
+          <div class="order-totals-row"><span>Subtotal</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
+          <div class="order-totals-row"><span>GST</span><span>$${Number(order.gst_aud).toFixed(2)}</span></div>
+          <div class="order-totals-row"><span>Shipping</span><span>${shippingText}</span></div>
+          <div class="order-totals-row total"><span>Total</span><span>$${grandTotal.toFixed(2)}${order.shipping_aud == null ? ' + shipping' : ''}</span></div>
+        </div>
+        ${order.notes ? '<p style="font-size:0.8rem; color:var(--grey-600); margin-top:1rem;"><strong>Your notes:</strong> ' + escapeHtml(order.notes) + '</p>' : ''}
+      </div>`;
+    list.appendChild(card);
+  });
+
+  document.querySelectorAll('[data-toggle]').forEach(head => {
+    head.addEventListener('click', () => {
+      const body = document.getElementById('order-body-' + head.dataset.toggle);
+      body.classList.toggle('open');
+    });
+  });
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'portal-login.html';
+});
+
+init();
+})();
+</script>
+</body>
+</html>
