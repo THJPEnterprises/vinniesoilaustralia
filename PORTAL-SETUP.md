@@ -93,7 +93,7 @@ Adds `pages/portal-order.html` (place an order), `pages/portal-orders.html` (ord
    update public.profiles set role = 'admin', approved = true
    where email = 'your-admin-email@example.com';
    ```
-3. Visit `/pages/admin.html` while signed in as that account — you'll see two tabs: **Orders** (every reseller's orders, click one to view line items and set status/shipping/internal notes) and **Pending Approvals** (approve new reseller signups with one click, instead of Table Editor).
+3. Visit `/pages/admin.html` while signed in as that account — you'll see three tabs: **Orders** (every reseller's orders, click one to view line items and set status/shipping/internal notes), **Products & Pricing**, and **Resellers** (see section 9 below for both).
 
 How it works for resellers: `portal-order.html` pulls live pricing from `wholesale_prices`, enforces each product's `min_order_qty`, calculates subtotal + 10% GST client-side, and shows shipping as "to be confirmed" (per your instruction — no shipping calculator, admin quotes it after submission). On submit it writes to `orders` + `order_items`. `portal-orders.html` shows the reseller their own order history and status.
 
@@ -137,6 +137,34 @@ Run `schema-zoho.sql` in SQL Editor first (adds two columns). Then, before synci
 - **Per product:** `update public.wholesale_prices set zoho_item_id = '...' where sku = '...';` — find the Item ID in Zoho Inventory → Items.
 
 If either is missing when an admin clicks "Sync to Zoho," the function fails with a clear message telling you exactly what's missing rather than partially syncing.
+
+## 9. Admin: pricing management, reseller accounts, and public RRP sync
+
+Run `schema-admin-extras.sql` in SQL Editor (after `schema-fix-rls-recursion.sql`). This adds admin write access to pricing and a public-safe view for RRP.
+
+### Products & Pricing tab
+
+Full CRUD on `wholesale_prices` directly from `/pages/admin.html` — no more Table Editor needed for day-to-day price changes. Click **+ Add Product** for a new row, edit any field inline, **Save** per row, or **Delete**. Changes take effect immediately on the reseller portal's price list and order form.
+
+**This also drives the public website's Recommended Retail Price.** The 6 product pages (`product-upo.html` and friends) now pull their RRP live from Supabase via a `public_pricing` view — a version of `wholesale_prices` with only `sku`, `product_name`, `size`, `rrp_aud` exposed publicly (wholesale cost stays private, never exposed to anonymous visitors). Editing a product's RRP in the admin tab updates the live site within moments — no code deploy needed. If Supabase is ever unreachable when a visitor loads the page, the originally hardcoded price silently stays shown instead of breaking anything.
+
+### Resellers tab
+
+Shows every reseller account (not just pending ones) in one table — edit business name, change role (reseller/wholesaler/admin), toggle approved, all inline with a **Save** button per row. The badge on the tab shows how many are still awaiting approval.
+
+**+ Create New User** opens a form to create a brand new account directly — email, business name, a temporary password you set, role, and whether to approve it immediately. This requires the `admin-create-user` Edge Function to be deployed (same deployment pattern as the Zoho function):
+
+```bash
+supabase functions deploy admin-create-user
+```
+
+It reuses the same `SUPABASE_SERVICE_ROLE_KEY` secret you'd have already set for Zoho — if you haven't set up Zoho yet, set it now:
+
+```bash
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+Creating a user this way sets `email_confirm: true` (skips email verification, since the admin is vouching for the account directly) and creates the account with the temp password ready to use immediately — tell the reseller the password separately, and they can change it via "Reset it here" on the login page whenever they like.
 
 ## 6. Security notes
 
