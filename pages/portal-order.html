@@ -326,7 +326,7 @@ document.getElementById('submit-order-btn').addEventListener('click', async () =
     const { error: itemsErr } = await supabase.from('order_items').insert(itemsWithOrderId);
     if (itemsErr) throw itemsErr;
 
-    showToast('Order submitted — PO ' + poNumber, 'success');
+    showToast('Order ' + order.order_number + ' submitted — PO ' + poNumber, 'success');
     setTimeout(() => { window.location.href = 'portal-orders.html'; }, 1200);
   } catch (err) {
     console.error('Order submission failed:', err);

@@ -176,7 +176,7 @@ async function loadOrders() {
     card.innerHTML = `
       <div class="order-card-head" data-toggle="${order.id}">
         <div>
-          <div class="order-card-po">PO ${escapeHtml(order.po_number)}</div>
+          <div class="order-card-po">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</div>
           <div class="order-card-date">${new Date(order.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
         </div>
         <span class="badge ${badgeClass}">${statusLabel}</span>

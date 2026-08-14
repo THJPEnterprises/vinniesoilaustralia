@@ -200,9 +200,10 @@ async function loadOrders() {
     return `
       <div class="order-row" data-order-id="${o.id}">
         <div class="order-row-top">
-          <span class="order-row-po">PO ${escapeHtml(o.po_number)}</span>
+          <span class="order-row-po">${escapeHtml(o.order_number || '—')}</span>
           <span class="badge badge-amber">${escapeHtml(o.status)}</span>
         </div>
+        <div class="order-row-biz" style="color:var(--grey-400);">PO ${escapeHtml(o.po_number)}</div>
         <div class="order-row-biz">${escapeHtml(biz?.business_name || biz?.email || 'Unknown')}</div>
         <div class="order-row-date">${new Date(o.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
       </div>`;
@@ -226,7 +227,7 @@ async function selectOrder(orderId) {
   const grandTotal = Number(order.subtotal_aud) + Number(order.gst_aud) + Number(order.shipping_aud || 0);
 
   detail.innerHTML = `
-    <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">PO ${escapeHtml(order.po_number)}</h2>
+    <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</h2>
     <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:1.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')}</p>
 
     <table class="detail-items-table">
