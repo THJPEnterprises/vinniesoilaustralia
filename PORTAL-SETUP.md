@@ -66,6 +66,23 @@ Since Supabase needs the site served over HTTPS with a real origin (not `file://
 4. Deploy. Cloudflare gives you a `*.pages.dev` URL immediately; add your custom domain under **Custom domains** the same way you would have with GitHub Pages.
 5. In Supabase → **Authentication → URL Configuration**, add your live site URL (and the `.pages.dev` preview URL) to **Redirect URLs** — needed for the password reset link to work.
 
+## 5b. Set up Resend for auth emails (password reset, invites)
+
+Supabase's built-in email sender is rate-limited and only meant for testing — for real reseller accounts, connect Resend as custom SMTP so reset/invite emails actually deliver reliably.
+
+1. In [Resend](https://resend.com), add and verify your sending domain (e.g. `vinniesoilaustralia.com`) under **Domains** — this means adding the DNS records Resend gives you (SPF/DKIM) wherever your domain's DNS is managed (Cloudflare, since that's already in the picture). Verification can take a few minutes to a few hours depending on DNS propagation.
+2. Create an API key under **API Keys** (full access, or restrict to "Sending" if offered).
+3. In Supabase → **Authentication → Settings → SMTP Settings**, enable custom SMTP and enter:
+   - **Sender email:** an address on your verified domain, e.g. `noreply@vinniesoilaustralia.com`
+   - **Sender name:** `Vinnie's Oil Australia`
+   - **Host:** `smtp.resend.com`
+   - **Port:** `465`
+   - **Username:** `resend`
+   - **Password:** your Resend API key
+4. Save, then test by triggering "Reset it here" on the login page for a real account — it should arrive within a minute or two.
+
+Until the domain is verified in Resend, sending will fail or emails may land in spam — verify the domain first before relying on this for real invites.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.

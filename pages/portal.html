@@ -98,6 +98,7 @@ body { background: var(--offwhite); }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/portal-config.js"></script>
 <script>
+(function () {
 const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 const gate = document.getElementById('portal-gate');
 const gateTitle = document.getElementById('gate-title');
@@ -245,6 +246,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 init();
+})();
 </script>
 </body>
 </html>

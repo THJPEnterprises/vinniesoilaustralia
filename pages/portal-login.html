@@ -64,7 +64,7 @@
     <div id="portal-error"></div>
     <div id="portal-info"></div>
 
-    <form id="login-form" novalidate>
+    <form id="login-form" method="post" action="javascript:void(0);" novalidate>
       <div class="form-group">
         <label for="p-email">Email Address</label>
         <input type="email" id="p-email" name="email" placeholder="you@yourbusiness.com.au" required autocomplete="username">
@@ -86,6 +86,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/portal-config.js"></script>
 <script>
+(function () {
 const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 const form = document.getElementById('login-form');
 const errBox = document.getElementById('portal-error');
@@ -136,11 +137,16 @@ document.getElementById('reset-link').addEventListener('click', async (e) => {
   e.preventDefault();
   const email = document.getElementById('p-email').value.trim();
   if (!email) { showError('Enter your email above first, then click "Reset it here".'); return; }
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.href
-  });
-  if (error) { showError(error.message); return; }
-  showInfo('Password reset email sent — check your inbox. The link will bring you back here to set a new password.');
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) { showError(error.message); return; }
+    showInfo('Password reset email sent — check your inbox. The link will bring you back here to set a new password.');
+  } catch (err) {
+    console.error('Password reset failed:', err);
+    showError('Something went wrong sending the reset email: ' + (err?.message || err));
+  }
 });
 
 // Handle the "PASSWORD_RECOVERY" flow: user arrives back here via the emailed
@@ -155,6 +161,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     await supabase.auth.signOut();
   }
 });
+})();
 </script>
 </body>
 </html>
