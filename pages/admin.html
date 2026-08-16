@@ -283,6 +283,11 @@ let selectedOrderId = null;
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = 'portal-login.html'; return; }
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== 'aal2') {
+    window.location.href = 'portal-login.html';
+    return;
+  }
 
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
@@ -665,7 +670,7 @@ async function loadApprovals() {
   list.innerHTML = `
     <div class="admin-table-wrap">
       <table class="admin-table">
-        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Tier</th><th>State</th><th>Region</th><th>Approved</th><th></th></tr></thead>
+        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Tier</th><th>State</th><th>Region</th><th>Approved</th><th></th><th></th></tr></thead>
         <tbody>
           ${allResellers.map(p => `
             <tr data-id="${p.id}">
@@ -701,6 +706,7 @@ async function loadApprovals() {
               <td><input type="text" class="rs-region" value="${escapeHtml(p.region || '')}" placeholder="Region covered"></td>
               <td style="text-align:center;"><input type="checkbox" class="rs-approved" ${p.approved ? 'checked' : ''} style="width:auto;"></td>
               <td><button class="btn btn-primary btn-sm rs-save-btn">Save</button></td>
+              <td><button class="btn btn-outline btn-sm rs-reset-mfa-btn">Reset MFA</button></td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -726,6 +732,29 @@ async function loadApprovals() {
       if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
       showToast('Reseller account updated', 'success');
       loadApprovals();
+    });
+  });
+
+  document.querySelectorAll('.rs-reset-mfa-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const email = row.querySelector('td').textContent;
+      if (!confirm('Reset two-factor authentication for ' + email + '? They will be prompted to set it up again from scratch next time they sign in.')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Resetting…';
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-reset-mfa', { body: { user_id: id } });
+        if (error) throw error;
+        showToast(data?.message || 'MFA reset', 'success');
+      } catch (err) {
+        console.error('MFA reset failed:', err);
+        showToast('Failed to reset MFA: ' + (err?.message || err) + '. Make sure the admin-reset-mfa Edge Function is deployed (see PORTAL-SETUP.md).', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reset MFA';
+      }
     });
   });
 }

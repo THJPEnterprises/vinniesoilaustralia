@@ -188,6 +188,11 @@ let tierLabel = 'Tier 1';
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = 'portal-login.html'; return; }
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== 'aal2') {
+    window.location.href = 'portal-login.html';
+    return;
+  }
   currentUserId = session.user.id;
 
   const { data: profile, error: profileErr } = await supabase

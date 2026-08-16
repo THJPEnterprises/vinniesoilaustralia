@@ -127,6 +127,38 @@
       </div>
       <button type="submit" id="recovery-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Set New Password</button>
     </form>
+
+    <!-- Shown once, the first time an account signs in — sets up mandatory
+         two-factor authentication via an authenticator app. -->
+    <div id="mfa-enroll-panel" style="display:none;">
+      <p class="sub" style="margin-bottom:1rem;">For security, every account needs two-factor authentication set up. Scan this QR code with an authenticator app (Google Authenticator, Authy, 1Password, etc.), then enter the 6-digit code it shows you.</p>
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <img id="mfa-qr-img" alt="Scan with your authenticator app" style="width:180px; height:180px; border:1px solid var(--grey-200); border-radius:8px; padding:8px;">
+        <p style="font-size:0.72rem; color:var(--grey-400); margin-top:0.75rem;">Can't scan it? Enter this code manually in your app:</p>
+        <p id="mfa-secret-text" style="font-family:monospace; font-size:0.85rem; color:var(--forest); word-break:break-all;"></p>
+      </div>
+      <form id="mfa-enroll-form" method="post" action="javascript:void(0);" novalidate>
+        <div class="form-group">
+          <label for="mfa-enroll-code">6-Digit Code</label>
+          <input type="text" id="mfa-enroll-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456" required autocomplete="one-time-code">
+        </div>
+        <button type="submit" id="mfa-enroll-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Verify &amp; Continue</button>
+      </form>
+    </div>
+
+    <!-- Shown on every subsequent sign-in for an account with MFA already
+         set up — enter the current code from the authenticator app. -->
+    <div id="mfa-challenge-panel" style="display:none;">
+      <p class="sub" style="margin-bottom:1.25rem;">Enter the 6-digit code from your authenticator app to finish signing in.</p>
+      <form id="mfa-challenge-form" method="post" action="javascript:void(0);" novalidate>
+        <div class="form-group">
+          <label for="mfa-challenge-code">6-Digit Code</label>
+          <input type="text" id="mfa-challenge-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456" required autocomplete="one-time-code">
+        </div>
+        <button type="submit" id="mfa-challenge-btn" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">Verify</button>
+      </form>
+      <p class="portal-footnote">Lost your device? Contact us to have your two-factor authentication reset.</p>
+    </div>
   </div>
 </div>
 
@@ -176,9 +208,107 @@ if (new URLSearchParams(window.location.search).get('reason') === 'idle') {
   showInfo('You were signed out after a period of inactivity. Please sign in again.');
 }
 
-// If already signed in, skip straight to the portal
+// ─── Two-factor authentication (mandatory, TOTP via authenticator app) ───
+const mfaEnrollPanel = document.getElementById('mfa-enroll-panel');
+const mfaEnrollForm = document.getElementById('mfa-enroll-form');
+const mfaEnrollBtn = document.getElementById('mfa-enroll-btn');
+const mfaChallengePanel = document.getElementById('mfa-challenge-panel');
+const mfaChallengeForm = document.getElementById('mfa-challenge-form');
+const mfaChallengeBtn = document.getElementById('mfa-challenge-btn');
+let pendingFactorId = null;
+
+function hideAllForms() {
+  form.style.display = 'none';
+  loginFootnote.style.display = 'none';
+  recoveryForm.style.display = 'none';
+  mfaEnrollPanel.style.display = 'none';
+  mfaChallengePanel.style.display = 'none';
+}
+
+// Called once a real signed-in session exists (fresh sign-in, or landing
+// here with an existing but not-yet-MFA'd session). Decides whether the
+// account needs to enrol MFA for the first time, needs to complete an MFA
+// challenge this session, or is already fully verified and can proceed.
+async function handlePostSignIn() {
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel === 'aal2') {
+    window.location.href = 'portal.html';
+    return;
+  }
+
+  const { data: factorsData, error: factorsErr } = await supabase.auth.mfa.listFactors();
+  if (factorsErr) {
+    showError('Could not check two-factor status: ' + factorsErr.message);
+    return;
+  }
+  const verifiedTotp = (factorsData?.totp || []).find(f => f.status === 'verified');
+
+  if (verifiedTotp) {
+    pendingFactorId = verifiedTotp.id;
+    hideAllForms();
+    mfaChallengePanel.style.display = 'block';
+  } else {
+    hideAllForms();
+    errBox.style.display = 'none';
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+    if (error) {
+      showError('Could not start two-factor setup: ' + error.message);
+      form.style.display = 'block';
+      loginFootnote.style.display = 'block';
+      return;
+    }
+    pendingFactorId = data.id;
+    document.getElementById('mfa-qr-img').src = data.totp.qr_code;
+    document.getElementById('mfa-secret-text').textContent = data.totp.secret;
+    mfaEnrollPanel.style.display = 'block';
+  }
+}
+
+mfaEnrollForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+  const code = document.getElementById('mfa-enroll-code').value.trim();
+  mfaEnrollBtn.disabled = true;
+  mfaEnrollBtn.textContent = 'Verifying…';
+
+  try {
+    const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+    if (chErr) throw chErr;
+    const { error: verErr } = await supabase.auth.mfa.verify({ factorId: pendingFactorId, challengeId: challenge.id, code });
+    if (verErr) throw verErr;
+    showToast('Two-factor authentication set up successfully', 'success');
+    window.location.href = 'portal.html';
+  } catch (err) {
+    showError('That code didn\'t work — check your authenticator app and try again.');
+    mfaEnrollBtn.disabled = false;
+    mfaEnrollBtn.textContent = 'Verify & Continue';
+  }
+});
+
+mfaChallengeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+  const code = document.getElementById('mfa-challenge-code').value.trim();
+  mfaChallengeBtn.disabled = true;
+  mfaChallengeBtn.textContent = 'Verifying…';
+
+  try {
+    const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId: pendingFactorId });
+    if (chErr) throw chErr;
+    const { error: verErr } = await supabase.auth.mfa.verify({ factorId: pendingFactorId, challengeId: challenge.id, code });
+    if (verErr) throw verErr;
+    window.location.href = 'portal.html';
+  } catch (err) {
+    showError('Incorrect code. Please try again.');
+    mfaChallengeBtn.disabled = false;
+    mfaChallengeBtn.textContent = 'Verify';
+  }
+});
+
+// If already signed in, resume wherever the MFA flow left off (or go
+// straight to the portal if already fully verified this session).
 supabase.auth.getSession().then(({ data }) => {
-  if (data.session) window.location.href = 'portal.html';
+  if (data.session) handlePostSignIn();
 });
 
 form.addEventListener('submit', async (e) => {
@@ -202,7 +332,7 @@ form.addEventListener('submit', async (e) => {
       : error.message);
     return;
   }
-  window.location.href = 'portal.html';
+  await handlePostSignIn();
 });
 
 const resetLink = document.getElementById('reset-link');

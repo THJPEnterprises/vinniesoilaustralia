@@ -143,6 +143,12 @@ async function init() {
     return;
   }
 
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== 'aal2') {
+    window.location.href = 'portal-login.html';
+    return;
+  }
+
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
     .select('approved, business_name, email, tier')

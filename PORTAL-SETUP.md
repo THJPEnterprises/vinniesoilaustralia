@@ -237,6 +237,19 @@ Lets a product (like a T-shirt) be ordered with a size breakdown — a reseller 
 3. On the reseller order form, a sized product automatically expands into one row per size (e.g. "Vinnie's Oil T-Shirt — Size M") — the reseller enters a quantity for each size they want, same as any other product, and the overall order minimum still counts every unit across every size and product.
 4. Order confirmations, "My Orders", and the admin Orders tab all show the size next to the product name on each line. If you sync an order to Zoho, the size is included in the line item name/description too.
 
+## 17. Mandatory two-factor authentication (MFA)
+
+Every account — reseller and admin — must set up two-factor authentication via an authenticator app (Google Authenticator, Authy, 1Password, etc.) before they can use the portal. This uses Supabase Auth's built-in TOTP support, so there's no extra service, no per-user cost, and no SMS fees.
+
+1. Run `schema-mfa-enforcement.sql` in SQL Editor (after `schema-admin-resources.sql`). This is the part that actually matters for security: it adds a `has_mfa()` check into the RLS policies on every table (profiles, orders, order_items, wholesale_prices, resources, tier_settings, order_settings, the dealer-resources storage bucket) so data simply cannot be read or written without a completed MFA challenge this session — enforced at the database level, not just hidden by the page. `public_pricing` is deliberately left untouched since anonymous website visitors need to keep seeing RRP with no login at all.
+2. **First sign-in for any account**: after entering email/password, they're shown a QR code to scan with their authenticator app, then enter the 6-digit code it generates to confirm setup. From then on, every sign-in asks for a fresh 6-digit code after the password.
+3. Deploy the new `admin-reset-mfa` Edge Function (same pattern as the others):
+   ```bash
+   supabase functions deploy admin-reset-mfa
+   ```
+   It reuses the same `SUPABASE_SERVICE_ROLE_KEY` secret already set for the other admin functions.
+4. **Lost device recovery**: if someone loses their phone/authenticator app, they can't get back in on their own (by design — that's the whole point of mandatory MFA). **Admin → Resellers tab** now has a **Reset MFA** button per account — clicking it clears their enrolled factor, and they're taken through the QR setup again from scratch on their next sign-in.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
