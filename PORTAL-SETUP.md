@@ -202,6 +202,14 @@ Adds a State (dropdown of NSW/VIC/QLD/SA/WA/TAS/NT/ACT) and a free-text Region f
 
 This is admin-managed data only — resellers don't see or edit their own state/region in the portal.
 
+## 13. Supabase Advisor cleanup (function search_path, leaked password protection)
+
+Run `schema-fix-function-search-path.sql` any time in SQL Editor — pins `search_path` on `handle_new_user()` and `generate_order_number()` so Supabase's Advisor stops flagging "Function Search Path Mutable" on them. No behaviour change, just closes a theoretical search_path-hijacking gap on two functions that run with elevated privileges.
+
+Also enable **Leaked Password Protection**: Supabase dashboard → Authentication → Settings → Password, turn on "Leaked password protection" — checks new passwords against known breached-password lists at signup/reset, no code change needed.
+
+The "Security Definer View" warning on `public_pricing` and the various "Auth RLS Initialization Plan" / "Multiple Permissive Policies" notices are expected/low-priority — see the note in section 9 about `public_pricing` being intentional, and the RLS ones are performance suggestions only relevant at much higher traffic than this site sees.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
