@@ -177,6 +177,16 @@ Run `schema-order-minimum.sql` in SQL Editor (after `schema-admin-extras.sql`). 
   update public.order_settings set min_order_qty = 10 where id = 1;
   ```
 
+## 11. Reseller tiers
+
+Adds three wholesale tiers, each with its own margin, order minimum, and shipping benefit — replacing the old "one price for everyone" model. A product's price to a given reseller is now calculated automatically as **RRP × (1 − their tier's margin %)**, rather than a single flat wholesale price.
+
+1. Run `schema-reseller-tiers.sql` in SQL Editor (after `schema-order-minimum.sql`). Creates `tier_settings` (3 seeded rows: Tier 1 = 35% margin / 10 unit minimum, Tier 2 = 40% / 25 units, Tier 3 = 50% / 50 units + free shipping), adds a `tier` column to `profiles` (defaults everyone to Tier 1), and a `reseller_tier` column on `orders` so you can see which tier pricing an order was placed under.
+2. **Admin → Reseller Tiers tab**: edit each tier's label, margin %, order minimum, free-shipping toggle, and the benefits text shown to resellers — no SQL needed for day-to-day changes.
+3. **Admin → Resellers tab**: assign each reseller to Tier 1/2/3 with the new Tier dropdown, alongside role and approval. There's no automatic tier upgrade — set this manually based on a reseller's typical order volume.
+4. Resellers see their current tier on the Dashboard (badge + link to a full tier comparison), the order form (tier pricing applied automatically, order minimum enforced per their tier, free shipping shown if their tier includes it), and a dedicated `pages/portal-tiers.html` page explaining all three tiers with their own highlighted.
+5. The old single "Overall Order Minimum" setting (`order_settings` table, section 10 above) is superseded by each tier's own minimum — you can leave `order_settings` in place, it's just no longer read by the order form.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.

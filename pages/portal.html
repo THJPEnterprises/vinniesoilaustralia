@@ -64,6 +64,7 @@ body { background: var(--offwhite); }
       <a href="portal.html" style="color:#fff; font-weight:600;">Dashboard</a>
       <a href="portal-order.html">Place an Order</a>
       <a href="portal-orders.html">My Orders</a>
+      <a href="portal-tiers.html">Your Tier</a>
     </div>
     <div class="p-user">
       <span id="user-email"></span>
@@ -72,7 +73,7 @@ body { background: var(--offwhite); }
   </div>
 
   <div class="portal-body">
-    <div class="badge badge-green" style="margin-bottom:1rem;">Wholesale Account</div>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem;" id="tier-badge-row"><div class="badge badge-green">Wholesale Account</div></div>
     <h1 style="color:var(--forest); font-size:1.8rem; margin-bottom:1.5rem;">Welcome back</h1>
 
     <div class="highlight-block" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
@@ -88,10 +89,10 @@ body { background: var(--offwhite); }
       <div id="pricing-wrap" style="overflow-x:auto;">
         <table class="data-table" id="pricing-table">
           <thead>
-            <tr><th>SKU</th><th>Product</th><th>Size</th><th>Wholesale (AUD)</th><th>RRP (AUD)</th><th>Min Order</th></tr>
+            <tr><th>SKU</th><th>Product</th><th>Size</th><th>Your Price (AUD)</th><th>RRP (AUD)</th></tr>
           </thead>
           <tbody id="pricing-body">
-            <tr><td colspan="6" style="color:var(--grey-400);">Loading…</td></tr>
+            <tr><td colspan="5" style="color:var(--grey-400);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -125,6 +126,7 @@ const gateTitle = document.getElementById('gate-title');
 const gateMsg = document.getElementById('gate-message');
 const gateRetry = document.getElementById('gate-retry');
 const app = document.getElementById('portal-app');
+let tierDiscountPct = 0;
 
 function showGate(title, msg, showRetry) {
   gateTitle.textContent = title;
@@ -143,7 +145,7 @@ async function init() {
 
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('approved, business_name, email')
+    .select('approved, business_name, email, tier')
     .eq('id', session.user.id)
     .single();
 
@@ -174,9 +176,21 @@ async function init() {
   gate.style.display = 'none';
   startIdleTimer(supabase, 30, 'portal-login.html');
 
+  await loadTierBadge(profile.tier || 1);
   loadPricing();
   loadGallery();
   loadResources();
+}
+
+async function loadTierBadge(tier) {
+  const { data } = await supabase.from('tier_settings').select('*').eq('tier', tier).single();
+  tierDiscountPct = Number(data?.discount_pct ?? 0);
+  const label = data?.label || ('Tier ' + tier);
+  const row = document.getElementById('tier-badge-row');
+  row.innerHTML =
+    '<div class="badge badge-green">' + label + ' — ' + tierDiscountPct + '% Margin</div>' +
+    (data?.free_shipping ? '<div class="badge badge-green">Free Shipping</div>' : '') +
+    '<a href="portal-tiers.html" class="badge badge-dark" style="text-decoration:none;">View all tiers &amp; benefits →</a>';
 }
 
 // Resolves a resources.file_path to a usable URL. If it's already a full
@@ -231,22 +245,24 @@ async function loadPricing() {
     .order('product_name', { ascending: true });
 
   if (error) {
-    body.innerHTML = '<tr><td colspan="6" style="color:#a13a00;">Unable to load pricing right now.</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" style="color:#a13a00;">Unable to load pricing right now.</td></tr>';
     return;
   }
   if (!data || data.length === 0) {
-    body.innerHTML = '<tr><td colspan="6" style="color:var(--grey-400);">No pricing published yet — check back soon.</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" style="color:var(--grey-400);">No pricing published yet — check back soon.</td></tr>';
     return;
   }
-  body.innerHTML = data.map(r => `
+  body.innerHTML = data.map(r => {
+    const yourPrice = r.rrp_aud != null ? Number(r.rrp_aud) * (1 - tierDiscountPct / 100) : Number(r.wholesale_price_aud ?? 0);
+    return `
     <tr>
       <td>${r.sku ?? ''}</td>
       <td>${r.product_name ?? ''}</td>
       <td>${r.size ?? ''}</td>
-      <td>$${Number(r.wholesale_price_aud ?? 0).toFixed(2)}</td>
+      <td>$${yourPrice.toFixed(2)}</td>
       <td>${r.rrp_aud != null ? '$' + Number(r.rrp_aud).toFixed(2) : '—'}</td>
-      <td>${r.min_order_qty ?? 1}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 async function loadResources() {

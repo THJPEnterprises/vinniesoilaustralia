@@ -98,6 +98,7 @@ body { background: var(--offwhite); }
     <div class="tab-nav" data-tabs>
       <button class="tab-btn active" data-tab="orders">Orders</button>
       <button class="tab-btn" data-tab="pricing">Products &amp; Pricing</button>
+      <button class="tab-btn" data-tab="tiers">Reseller Tiers</button>
       <button class="tab-btn" data-tab="resellers">Resellers <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
     </div>
 
@@ -126,13 +127,23 @@ body { background: var(--offwhite); }
       </div>
 
       <div class="section-toolbar">
-        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">Wholesale price feeds the reseller portal &amp; order form. RRP also feeds the public product pages.</p>
+        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">RRP drives both the public product pages and reseller pricing (each tier gets RRP minus their margin — set tier margins in the Reseller Tiers tab). The Wholesale $ column below is kept for your own reference only.</p>
         <button id="add-product-btn" class="btn btn-primary btn-sm">+ Add Product</button>
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table" id="pricing-table">
           <thead><tr><th>SKU</th><th>Product Name</th><th>Size</th><th>Wholesale $</th><th>RRP $</th><th></th></tr></thead>
           <tbody id="pricing-table-body"><tr><td colspan="6" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="tiers">
+      <p style="color:var(--grey-600); font-size:0.85rem; margin-bottom:1.25rem;">Each product's price to a reseller is calculated automatically as RRP × (1 − their tier's margin %) — set the margin, order minimum and shipping benefit per tier here. Assign a reseller to a tier in the Resellers tab.</p>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="tiers-table">
+          <thead><tr><th>Tier</th><th>Label</th><th>Margin %</th><th>Order Min (units)</th><th>Free Shipping</th><th>Benefits Text</th><th></th></tr></thead>
+          <tbody id="tiers-table-body"><tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -255,6 +266,7 @@ async function init() {
   loadApprovals();
   loadPricing();
   loadMinOrderQty();
+  loadTiers();
 }
 
 async function loadMinOrderQty() {
@@ -276,6 +288,53 @@ document.getElementById('save-min-order-btn').addEventListener('click', async ()
   if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
   showToast('Order minimum updated to ' + val + ' units', 'success');
 });
+
+async function loadTiers() {
+  const body = document.getElementById('tiers-table-body');
+  const { data, error } = await supabase.from('tier_settings').select('*').order('tier', { ascending: true });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="7" style="color:#a13a00; padding:1.25rem;">Unable to load tiers.</td></tr>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">No tiers configured — run schema-reseller-tiers.sql.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(t => `
+    <tr data-tier="${t.tier}">
+      <td>${t.tier}</td>
+      <td><input type="text" class="tr-label" value="${escapeHtml(t.label)}"></td>
+      <td><input type="number" step="0.1" min="0" max="100" class="tr-discount" value="${t.discount_pct}"></td>
+      <td><input type="number" step="1" min="1" class="tr-minqty" value="${t.min_order_qty}"></td>
+      <td style="text-align:center;"><input type="checkbox" class="tr-freeship" ${t.free_shipping ? 'checked' : ''} style="width:auto;"></td>
+      <td><input type="text" class="tr-benefits" value="${escapeHtml(t.benefits || '')}" style="min-width:220px;"></td>
+      <td><button class="btn btn-primary btn-sm tr-save-btn">Save</button></td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.tr-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const tier = Number(row.dataset.tier);
+      const payload = {
+        label: row.querySelector('.tr-label').value.trim(),
+        discount_pct: Number(row.querySelector('.tr-discount').value) || 0,
+        min_order_qty: Number(row.querySelector('.tr-minqty').value) || 1,
+        free_shipping: row.querySelector('.tr-freeship').checked,
+        benefits: row.querySelector('.tr-benefits').value.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      const { error } = await supabase.from('tier_settings').update(payload).eq('tier', tier);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+      showToast('Tier ' + tier + ' updated', 'success');
+    });
+  });
+}
 
 async function loadOrders() {
   const panel = document.getElementById('orders-list-panel');
@@ -332,7 +391,7 @@ async function selectOrder(orderId) {
 
   detail.innerHTML = `
     <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</h2>
-    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:1.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')}</p>
+    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:1.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')} ${order.reseller_tier ? '<span class="badge badge-dark" style="margin-left:6px;">Tier ' + order.reseller_tier + ' order</span>' : ''}</p>
 
     <table class="detail-items-table">
       <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
@@ -456,7 +515,7 @@ async function loadApprovals() {
   list.innerHTML = `
     <div class="admin-table-wrap">
       <table class="admin-table">
-        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Approved</th><th></th></tr></thead>
+        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Tier</th><th>Approved</th><th></th></tr></thead>
         <tbody>
           ${allResellers.map(p => `
             <tr data-id="${p.id}">
@@ -467,6 +526,13 @@ async function loadApprovals() {
                   <option value="reseller" ${p.role === 'reseller' ? 'selected' : ''}>Reseller</option>
                   <option value="wholesaler" ${p.role === 'wholesaler' ? 'selected' : ''}>Wholesaler</option>
                   <option value="admin" ${p.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+              </td>
+              <td>
+                <select class="rs-tier">
+                  <option value="1" ${(p.tier || 1) === 1 ? 'selected' : ''}>Tier 1</option>
+                  <option value="2" ${p.tier === 2 ? 'selected' : ''}>Tier 2</option>
+                  <option value="3" ${p.tier === 3 ? 'selected' : ''}>Tier 3</option>
                 </select>
               </td>
               <td style="text-align:center;"><input type="checkbox" class="rs-approved" ${p.approved ? 'checked' : ''} style="width:auto;"></td>
@@ -482,11 +548,12 @@ async function loadApprovals() {
       const id = row.dataset.id;
       const business_name = row.querySelector('.rs-business').value.trim() || null;
       const role = row.querySelector('.rs-role').value;
+      const tier = Number(row.querySelector('.rs-tier').value);
       const approved = row.querySelector('.rs-approved').checked;
 
       btn.disabled = true;
       btn.textContent = 'Saving…';
-      const { error } = await supabase.from('profiles').update({ business_name, role, approved }).eq('id', id);
+      const { error } = await supabase.from('profiles').update({ business_name, role, tier, approved }).eq('id', id);
       btn.disabled = false;
       btn.textContent = 'Save';
 

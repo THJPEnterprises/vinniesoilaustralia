@@ -38,6 +38,8 @@ body { background: var(--offwhite); }
 .moq-banner.invalid { background: rgba(200,60,10,0.06); border-left-color: #c8460a; }
 .moq-banner strong { color: var(--forest); }
 .moq-banner.invalid strong { color: #a13a00; }
+.tier-info { font-size: 0.82rem; color: var(--grey-600); margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+.tier-info .badge { font-size: 0.68rem; }
 
 .order-summary { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
 .order-summary-box { width: 100%; max-width: 320px; }
@@ -81,6 +83,7 @@ body { background: var(--offwhite); }
       <a href="portal.html">Dashboard</a>
       <a href="portal-order.html" style="color:#fff; font-weight:600;">Place an Order</a>
       <a href="portal-orders.html">My Orders</a>
+      <a href="portal-tiers.html">Your Tier</a>
     </div>
     <div class="p-user">
       <span id="user-email"></span>
@@ -95,6 +98,7 @@ body { background: var(--offwhite); }
     <div class="portal-section">
       <h2>Products</h2>
       <p class="section-note">Enter a quantity for each product you'd like to order — mix and match any products to reach the overall order minimum below.</p>
+      <div class="tier-info" id="tier-info"></div>
       <div class="moq-banner" id="moq-banner"><span>Order total: <strong id="moq-current">0</strong> units</span><span>Minimum order: <strong id="moq-required">—</strong> units</span></div>
       <div style="overflow-x:auto;">
         <table class="order-table" id="order-table">
@@ -111,7 +115,7 @@ body { background: var(--offwhite); }
         <div class="order-summary-box">
           <div class="order-summary-row"><span>Subtotal</span><span id="sum-subtotal">$0.00</span></div>
           <div class="order-summary-row"><span>GST (10%)</span><span id="sum-gst">$0.00</span></div>
-          <div class="order-summary-row"><span>Shipping<span class="label-note">Confirmed by our team after submission</span></span><span>TBC</span></div>
+          <div class="order-summary-row"><span>Shipping<span class="label-note" id="shipping-note">Confirmed by our team after submission</span></span><span id="shipping-value">TBC</span></div>
           <div class="order-summary-row total"><span>Total (excl. shipping)</span><span id="sum-total">$0.00</span></div>
         </div>
       </div>
@@ -175,6 +179,10 @@ function showToast(msg, type) {
 let currentUserId = null;
 let products = [];
 let minOrderQty = 1;
+let currentTier = 1;
+let tierDiscountPct = 0;
+let tierFreeShipping = false;
+let tierLabel = 'Tier 1';
 
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -183,7 +191,7 @@ async function init() {
 
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('approved, business_name, email')
+    .select('approved, business_name, email, tier')
     .eq('id', session.user.id)
     .single();
 
@@ -201,18 +209,37 @@ async function init() {
   }
 
   document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
+  currentTier = profile.tier || 1;
   app.style.display = 'block';
   gate.style.display = 'none';
   startIdleTimer(supabase, 30, 'portal-login.html');
 
-  await loadOrderSettings();
+  await loadTierInfo();
   loadProducts();
 }
 
-async function loadOrderSettings() {
-  const { data } = await supabase.from('order_settings').select('min_order_qty').eq('id', 1).single();
-  minOrderQty = data?.min_order_qty ?? 1;
+async function loadTierInfo() {
+  const { data } = await supabase.from('tier_settings').select('*').eq('tier', currentTier).single();
+  minOrderQty = data?.min_order_qty ?? 10;
+  tierDiscountPct = Number(data?.discount_pct ?? 0);
+  tierFreeShipping = !!data?.free_shipping;
+  tierLabel = data?.label || ('Tier ' + currentTier);
   document.getElementById('moq-required').textContent = minOrderQty;
+
+  document.getElementById('tier-info').innerHTML =
+    '<span class="badge badge-green">' + tierLabel + '</span>' +
+    '<span>' + tierDiscountPct + '% margin pricing applied below</span>' +
+    (tierFreeShipping ? '<span class="badge badge-green">Free Shipping</span>' : '');
+
+  if (tierFreeShipping) {
+    document.getElementById('shipping-note').textContent = 'Included — ' + tierLabel + ' benefit';
+    document.getElementById('shipping-value').textContent = 'FREE';
+  }
+}
+
+function priceFor(p) {
+  if (p.rrp_aud != null) return Number(p.rrp_aud) * (1 - tierDiscountPct / 100);
+  return Number(p.wholesale_price_aud ?? 0);
 }
 
 async function loadProducts() {
@@ -232,7 +259,7 @@ async function loadProducts() {
     <tr data-sku="${p.sku}">
       <td>${p.product_name}</td>
       <td>${p.size ?? '—'}</td>
-      <td>$${Number(p.wholesale_price_aud ?? 0).toFixed(2)}</td>
+      <td>$${priceFor(p).toFixed(2)}</td>
       <td>
         <input type="number" min="0" step="1" value="0" class="qty-input" data-sku="${p.sku}">
       </td>
@@ -254,7 +281,7 @@ function recalculate() {
     if (!input) return;
     const qty = Math.max(0, parseInt(input.value, 10) || 0);
     const totalEl = document.querySelector('[data-sku-total="' + cssEscape(p.sku) + '"]');
-    const lineTotal = qty * Number(p.wholesale_price_aud ?? 0);
+    const lineTotal = qty * priceFor(p);
 
     totalQty += qty;
     if (qty > 0) subtotal += lineTotal;
@@ -303,9 +330,9 @@ document.getElementById('submit-order-btn').addEventListener('click', async () =
       return qty > 0 ? {
         sku: p.sku,
         product_name: p.product_name,
-        unit_price_aud: p.wholesale_price_aud,
+        unit_price_aud: priceFor(p),
         qty,
-        line_total_aud: qty * Number(p.wholesale_price_aud ?? 0)
+        line_total_aud: qty * priceFor(p)
       } : null;
     })
     .filter(Boolean);
@@ -322,6 +349,7 @@ document.getElementById('submit-order-btn').addEventListener('click', async () =
         po_number: poNumber,
         subtotal_aud: subtotal,
         gst_aud: gst,
+        reseller_tier: currentTier,
         notes: document.getElementById('order-notes').value.trim() || null
       })
       .select()
