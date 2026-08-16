@@ -258,7 +258,15 @@ Platinum's real qualifying bar — a quarterly order volume of 50+ units — isn
 
 Platinum's extra perks (30-day account terms, priority dispatch, early access to new/limited product lines, a 2% quarterly volume rebate on paid orders, marketing posters/displays, and being featured as a "Preferred Partner") are listed on the tier comparison page — these are benefits you deliver manually (invoicing terms, dispatch priority, rebate payment, etc.), the portal doesn't automate any of them.
 
-**"Preferred Partner" badge**: added to `pages/retail-network.html` on Arborean's listing as a test — a small gold ribbon badge on their retailer card. Since the retail network page is static HTML (not admin-managed), adding/removing this badge for other stockists means editing that file directly — ask if you'd like this pulled into the admin UI instead once you have more than one Platinum-tier retailer to feature.
+**"Preferred Partner" badge**: originally added as a one-off static edit to Arborean's card on `pages/retail-network.html`. This has since been replaced by full admin-managed retailer listings — see section 19 below.
+
+## 19. Admin-managed Retail Network listings
+
+Run `schema-retailers.sql` in SQL Editor. Creates a `retailers` table (business name, state, description, website, `preferred_partner` flag, `active` flag, `sort_order`) with RLS: anyone can read `active = true` rows, only admins can read/write everything else. Seeds it with the existing Arborean (NSW) listing, `preferred_partner = true`.
+
+Manage retailers in Admin → Retail Network: add/edit/delete listings, toggle Preferred Partner (shows the gold "★ Preferred Partner" badge on their public card) and Active (unticking Active hides a retailer from the public page without deleting their record — use this instead of Delete when a stockist relationship pauses).
+
+`pages/retail-network.html` now fetches active retailers live from Supabase and renders their cards into the existing state-filtered grid — no more hardcoded stockist HTML. The "Coming Soon" per-state placeholders and the "Online Retail Partners" card are still static and untouched.
 
 ## 6. Security notes
 
