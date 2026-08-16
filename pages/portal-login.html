@@ -170,6 +170,12 @@ function showToast(msg, type) {
   }, 4500);
 }
 
+// If arriving here after an idle-timeout auto sign-out, let the person know
+// why, rather than silently landing back on a blank login form.
+if (new URLSearchParams(window.location.search).get('reason') === 'idle') {
+  showInfo('You were signed out after a period of inactivity. Please sign in again.');
+}
+
 // If already signed in, skip straight to the portal
 supabase.auth.getSession().then(({ data }) => {
   if (data.session) window.location.href = 'portal.html';

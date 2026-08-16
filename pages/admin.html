@@ -176,6 +176,7 @@ body { background: var(--offwhite); }
 <script src="../js/shared.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/portal-config.js"></script>
+<script src="../js/idle-timeout.js"></script>
 <script>
 (function () {
 const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
@@ -236,6 +237,7 @@ async function init() {
   document.getElementById('user-email').textContent = profile.business_name || profile.email || session.user.email;
   app.style.display = 'block';
   gate.style.display = 'none';
+  startIdleTimer(supabase, 30, 'portal-login.html');
 
   loadOrders();
   loadApprovals();
