@@ -34,6 +34,10 @@ body { background: var(--offwhite); }
 .moq-note { font-size: 0.7rem; color: var(--grey-400); margin-top: 2px; }
 .moq-note.invalid { color: #c8460a; font-weight: 600; }
 .line-total { font-weight: 600; color: var(--forest); }
+.moq-banner { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; background: var(--offwhite); border-left: 3px solid var(--moss); font-size: 0.85rem; }
+.moq-banner.invalid { background: rgba(200,60,10,0.06); border-left-color: #c8460a; }
+.moq-banner strong { color: var(--forest); }
+.moq-banner.invalid strong { color: #a13a00; }
 
 .order-summary { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
 .order-summary-box { width: 100%; max-width: 320px; }
@@ -90,14 +94,15 @@ body { background: var(--offwhite); }
 
     <div class="portal-section">
       <h2>Products</h2>
-      <p class="section-note">Enter a quantity for each product you'd like to order. Each product has its own minimum order quantity — you'll see a warning if you're under it.</p>
+      <p class="section-note">Enter a quantity for each product you'd like to order — mix and match any products to reach the overall order minimum below.</p>
+      <div class="moq-banner" id="moq-banner"><span>Order total: <strong id="moq-current">0</strong> units</span><span>Minimum order: <strong id="moq-required">—</strong> units</span></div>
       <div style="overflow-x:auto;">
         <table class="order-table" id="order-table">
           <thead>
-            <tr><th>Product</th><th>Size</th><th>Wholesale (AUD)</th><th>Min Order</th><th>Quantity</th><th>Line Total</th></tr>
+            <tr><th>Product</th><th>Size</th><th>Wholesale (AUD)</th><th>Quantity</th><th>Line Total</th></tr>
           </thead>
           <tbody id="order-table-body">
-            <tr><td colspan="6" style="color:var(--grey-400);">Loading products…</td></tr>
+            <tr><td colspan="5" style="color:var(--grey-400);">Loading products…</td></tr>
           </tbody>
         </table>
       </div>
@@ -169,6 +174,7 @@ function showToast(msg, type) {
 
 let currentUserId = null;
 let products = [];
+let minOrderQty = 1;
 
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -199,7 +205,14 @@ async function init() {
   gate.style.display = 'none';
   startIdleTimer(supabase, 30, 'portal-login.html');
 
+  await loadOrderSettings();
   loadProducts();
+}
+
+async function loadOrderSettings() {
+  const { data } = await supabase.from('order_settings').select('min_order_qty').eq('id', 1).single();
+  minOrderQty = data?.min_order_qty ?? 1;
+  document.getElementById('moq-required').textContent = minOrderQty;
 }
 
 async function loadProducts() {
@@ -210,7 +223,7 @@ async function loadProducts() {
     .order('product_name', { ascending: true });
 
   if (error || !data || data.length === 0) {
-    body.innerHTML = '<tr><td colspan="6" style="color:var(--grey-400);">No products available to order right now.</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" style="color:var(--grey-400);">No products available to order right now.</td></tr>';
     return;
   }
 
@@ -220,10 +233,8 @@ async function loadProducts() {
       <td>${p.product_name}</td>
       <td>${p.size ?? '—'}</td>
       <td>$${Number(p.wholesale_price_aud ?? 0).toFixed(2)}</td>
-      <td>${p.min_order_qty ?? 1}</td>
       <td>
         <input type="number" min="0" step="1" value="0" class="qty-input" data-sku="${p.sku}">
-        <div class="moq-note" data-sku-note="${p.sku}"></div>
       </td>
       <td class="line-total" data-sku-total="${p.sku}">$0.00</td>
     </tr>`).join('');
@@ -236,46 +247,40 @@ async function loadProducts() {
 
 function recalculate() {
   let subtotal = 0;
-  let hasInvalid = false;
-  let hasAnyItem = false;
+  let totalQty = 0;
 
   products.forEach(p => {
     const input = document.querySelector('.qty-input[data-sku="' + cssEscape(p.sku) + '"]');
     if (!input) return;
     const qty = Math.max(0, parseInt(input.value, 10) || 0);
-    const moq = p.min_order_qty ?? 1;
-    const noteEl = document.querySelector('[data-sku-note="' + cssEscape(p.sku) + '"]');
     const totalEl = document.querySelector('[data-sku-total="' + cssEscape(p.sku) + '"]');
     const lineTotal = qty * Number(p.wholesale_price_aud ?? 0);
 
-    if (qty > 0 && qty < moq) {
-      input.classList.add('invalid');
-      noteEl.textContent = 'Minimum order is ' + moq;
-      noteEl.classList.add('invalid');
-      hasInvalid = true;
-    } else {
-      input.classList.remove('invalid');
-      noteEl.textContent = '';
-      noteEl.classList.remove('invalid');
-    }
-
-    if (qty > 0) { hasAnyItem = true; subtotal += lineTotal; }
+    totalQty += qty;
+    if (qty > 0) subtotal += lineTotal;
     totalEl.textContent = '$' + lineTotal.toFixed(2);
   });
 
   const gst = subtotal * 0.10;
   const total = subtotal + gst;
+  const hasAnyItem = totalQty > 0;
+  const meetsMinimum = totalQty >= minOrderQty;
 
   document.getElementById('sum-subtotal').textContent = '$' + subtotal.toFixed(2);
   document.getElementById('sum-gst').textContent = '$' + gst.toFixed(2);
   document.getElementById('sum-total').textContent = '$' + total.toFixed(2);
 
-  const submitBtn = document.getElementById('submit-order-btn');
-  submitBtn.disabled = hasInvalid || !hasAnyItem;
-  submitBtn.style.opacity = submitBtn.disabled ? '0.5' : '1';
-  submitBtn.style.cursor = submitBtn.disabled ? 'not-allowed' : 'pointer';
+  const banner = document.getElementById('moq-banner');
+  document.getElementById('moq-current').textContent = totalQty;
+  banner.classList.toggle('invalid', hasAnyItem && !meetsMinimum);
 
-  return { subtotal, gst, total, hasInvalid, hasAnyItem };
+  const submitBtn = document.getElementById('submit-order-btn');
+  const canSubmit = hasAnyItem && meetsMinimum;
+  submitBtn.disabled = !canSubmit;
+  submitBtn.style.opacity = canSubmit ? '1' : '0.5';
+  submitBtn.style.cursor = canSubmit ? 'pointer' : 'not-allowed';
+
+  return { subtotal, gst, total, totalQty, hasAnyItem, meetsMinimum };
 }
 
 function cssEscape(str) {
@@ -284,12 +289,12 @@ function cssEscape(str) {
 
 document.getElementById('submit-order-btn').addEventListener('click', async () => {
   errBox.style.display = 'none';
-  const { subtotal, gst, hasInvalid, hasAnyItem } = recalculate();
+  const { subtotal, gst, totalQty, hasAnyItem, meetsMinimum } = recalculate();
 
   const poNumber = document.getElementById('po-number').value.trim();
   if (!poNumber) { showError('Enter your Purchase Order number before submitting.'); return; }
-  if (hasInvalid) { showError('One or more products are below their minimum order quantity.'); return; }
   if (!hasAnyItem) { showError('Add a quantity for at least one product.'); return; }
+  if (!meetsMinimum) { showError('Your order totals ' + totalQty + ' units — the minimum order is ' + minOrderQty + ' units across all products.'); return; }
 
   const items = products
     .map(p => {

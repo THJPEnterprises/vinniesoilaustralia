@@ -113,14 +113,26 @@ body { background: var(--offwhite); }
     </div>
 
     <div class="tab-panel" data-panel="pricing">
+      <div class="highlight-block" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+          <h3 style="margin-bottom:0.25rem;">Overall Order Minimum</h3>
+          <p style="margin:0;">Applies to the total quantity across all products on an order (not per-product) — resellers can mix products to reach it.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="number" id="min-order-qty-input" min="1" step="1" style="width:90px; padding:8px 10px; border:1.5px solid var(--grey-200); border-radius:6px;">
+          <span style="font-size:0.85rem; color:var(--grey-600);">units</span>
+          <button id="save-min-order-btn" class="btn btn-primary btn-sm">Save</button>
+        </div>
+      </div>
+
       <div class="section-toolbar">
         <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">Wholesale price feeds the reseller portal &amp; order form. RRP also feeds the public product pages.</p>
         <button id="add-product-btn" class="btn btn-primary btn-sm">+ Add Product</button>
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table" id="pricing-table">
-          <thead><tr><th>SKU</th><th>Product Name</th><th>Size</th><th>Wholesale $</th><th>RRP $</th><th>Min Order</th><th></th></tr></thead>
-          <tbody id="pricing-table-body"><tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
+          <thead><tr><th>SKU</th><th>Product Name</th><th>Size</th><th>Wholesale $</th><th>RRP $</th><th></th></tr></thead>
+          <tbody id="pricing-table-body"><tr><td colspan="6" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -242,7 +254,28 @@ async function init() {
   loadOrders();
   loadApprovals();
   loadPricing();
+  loadMinOrderQty();
 }
+
+async function loadMinOrderQty() {
+  const { data } = await supabase.from('order_settings').select('min_order_qty').eq('id', 1).single();
+  document.getElementById('min-order-qty-input').value = data?.min_order_qty ?? 10;
+}
+
+document.getElementById('save-min-order-btn').addEventListener('click', async () => {
+  const val = Number(document.getElementById('min-order-qty-input').value);
+  if (!val || val < 1) { showToast('Enter a valid minimum quantity', 'error'); return; }
+
+  const btn = document.getElementById('save-min-order-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const { error } = await supabase.from('order_settings').update({ min_order_qty: val, updated_at: new Date().toISOString() }).eq('id', 1);
+  btn.disabled = false;
+  btn.textContent = 'Save';
+
+  if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+  showToast('Order minimum updated to ' + val + ' units', 'success');
+});
 
 async function loadOrders() {
   const panel = document.getElementById('orders-list-panel');
@@ -470,11 +503,11 @@ async function loadPricing() {
   const { data, error } = await supabase.from('wholesale_prices').select('*').order('product_name', { ascending: true });
 
   if (error) {
-    body.innerHTML = '<tr><td colspan="7" style="color:#a13a00; padding:1.25rem;">Unable to load pricing.</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" style="color:#a13a00; padding:1.25rem;">Unable to load pricing.</td></tr>';
     return;
   }
   if (!data || data.length === 0) {
-    body.innerHTML = '<tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">No products yet — click "+ Add Product" to create one.</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" style="color:var(--grey-400); padding:1.25rem;">No products yet — click "+ Add Product" to create one.</td></tr>';
     return;
   }
 
@@ -485,7 +518,6 @@ async function loadPricing() {
       <td><input type="text" class="pr-size" value="${escapeHtml(p.size || '')}"></td>
       <td><input type="number" step="0.01" class="pr-wholesale" value="${p.wholesale_price_aud ?? ''}"></td>
       <td><input type="number" step="0.01" class="pr-rrp" value="${p.rrp_aud ?? ''}"></td>
-      <td><input type="number" step="1" class="pr-moq" value="${p.min_order_qty ?? 1}"></td>
       <td class="row-actions">
         <button class="btn btn-primary btn-sm pr-save-btn">Save</button>
         <button class="btn btn-outline btn-sm pr-delete-btn">Delete</button>
@@ -502,7 +534,6 @@ async function loadPricing() {
         size: row.querySelector('.pr-size').value.trim() || null,
         wholesale_price_aud: Number(row.querySelector('.pr-wholesale').value) || 0,
         rrp_aud: row.querySelector('.pr-rrp').value === '' ? null : Number(row.querySelector('.pr-rrp').value),
-        min_order_qty: Number(row.querySelector('.pr-moq').value) || 1,
       };
       btn.disabled = true;
       btn.textContent = 'Saving…';
@@ -530,7 +561,7 @@ async function loadPricing() {
 document.getElementById('add-product-btn').addEventListener('click', async () => {
   const { data, error } = await supabase
     .from('wholesale_prices')
-    .insert({ sku: 'NEW-SKU', product_name: 'New Product', wholesale_price_aud: 0, min_order_qty: 1 })
+    .insert({ sku: 'NEW-SKU', product_name: 'New Product', wholesale_price_aud: 0 })
     .select()
     .single();
   if (error) { showToast('Failed to add product: ' + error.message, 'error'); return; }

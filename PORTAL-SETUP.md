@@ -166,6 +166,17 @@ supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 Creating a user this way sets `email_confirm: true` (skips email verification, since the admin is vouching for the account directly) and creates the account with the temp password ready to use immediately — tell the reseller the password separately, and they can change it via "Reset it here" on the login page whenever they like.
 
+## 10. Overall order minimum (replaces per-product MOQ)
+
+Run `schema-order-minimum.sql` in SQL Editor (after `schema-admin-extras.sql`). This adds an `order_settings` table with a single number: the minimum total quantity across an *entire* order, any mix of products — replacing the old behaviour where each product's own minimum blocked small quantities individually (e.g. 2 of one item + 3 of another used to fail even though the combined total was reasonable).
+
+- Resellers see a running "Order total: X units / Minimum order: Y units" banner on the order form, and Submit stays disabled until the total is met.
+- Admins can change the minimum any time from the **Products & Pricing** tab in `/pages/admin.html` — no SQL needed after the initial migration.
+- Default is 10 units; change it via the admin UI or directly:
+  ```sql
+  update public.order_settings set min_order_qty = 10 where id = 1;
+  ```
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
