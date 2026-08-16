@@ -221,6 +221,16 @@ function escapeHtml(str) {
   div.textContent = str == null ? '' : String(str);
   return div.innerHTML;
 }
+function formatAEST(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const formatted = d.toLocaleString('en-AU', {
+    timeZone: 'Australia/Brisbane',
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true
+  });
+  return formatted + ' AEST';
+}
 const toastStack = document.getElementById('toast-stack');
 function showToast(msg, type) {
   const toast = document.createElement('div');
@@ -370,7 +380,7 @@ async function loadOrders() {
         </div>
         <div class="order-row-biz" style="color:var(--grey-400);">PO ${escapeHtml(o.po_number)}</div>
         <div class="order-row-biz">${escapeHtml(biz?.business_name || biz?.email || 'Unknown')}</div>
-        <div class="order-row-date">${new Date(o.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+        <div class="order-row-date">${formatAEST(o.created_at)}</div>
       </div>`;
   }).join('');
 
@@ -393,7 +403,8 @@ async function selectOrder(orderId) {
 
   detail.innerHTML = `
     <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</h2>
-    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:1.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')} ${order.reseller_tier ? '<span class="badge badge-dark" style="margin-left:6px;">Tier ' + order.reseller_tier + ' order</span>' : ''}</p>
+    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:0.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')} ${order.reseller_tier ? '<span class="badge badge-dark" style="margin-left:6px;">Tier ' + order.reseller_tier + ' order</span>' : ''}</p>
+    <p style="font-size:0.78rem; color:var(--grey-400); margin-bottom:1.5rem;">Submitted ${formatAEST(order.created_at)}${order.updated_at && order.updated_at !== order.created_at ? ' · Last updated ' + formatAEST(order.updated_at) : ''}</p>
 
     <table class="detail-items-table">
       <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>

@@ -98,6 +98,16 @@ function escapeHtml(str) {
   div.textContent = str == null ? '' : String(str);
   return div.innerHTML;
 }
+function formatAEST(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const formatted = d.toLocaleString('en-AU', {
+    timeZone: 'Australia/Brisbane',
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true
+  });
+  return formatted + ' AEST';
+}
 
 const STATUS_LABELS = {
   submitted: 'Submitted',
@@ -180,7 +190,7 @@ async function loadOrders() {
       <div class="order-card-head" data-toggle="${order.id}">
         <div>
           <div class="order-card-po">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</div>
-          <div class="order-card-date">${new Date(order.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+          <div class="order-card-date">Submitted ${formatAEST(order.created_at)}${order.updated_at && order.updated_at !== order.created_at ? ' · Updated ' + formatAEST(order.updated_at) : ''}</div>
         </div>
         <span class="badge ${badgeClass}">${statusLabel}</span>
         <div class="order-card-total">$${grandTotal.toFixed(2)}${order.shipping_aud == null ? ' + shipping' : ''}</div>
