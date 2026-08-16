@@ -47,12 +47,16 @@ Deno.serve(async (req) => {
       return jsonError("Admin access required", 403);
     }
 
-    const { email, password, business_name, role, approved } = await req.json();
+    const { email, password, business_name, role, approved, state, region } = await req.json();
 
     if (!email || !password) return jsonError("email and password are required", 400);
     if (password.length < 6) return jsonError("Password must be at least 6 characters", 400);
     if (role && !["reseller", "wholesaler", "admin"].includes(role)) {
       return jsonError("role must be reseller, wholesaler or admin", 400);
+    }
+    const AU_STATES = ["NSW", "VIC", "QLD", "SA", "WA", "TAS", "NT", "ACT"];
+    if (state && !AU_STATES.includes(state)) {
+      return jsonError("state must be one of " + AU_STATES.join(", "), 400);
     }
 
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -76,6 +80,8 @@ Deno.serve(async (req) => {
         business_name: business_name || null,
         role: role || "reseller",
         approved: approved !== false,
+        state: state || null,
+        region: region || null,
       })
       .eq("id", created.user.id);
 

@@ -187,6 +187,26 @@ body { background: var(--offwhite); }
         <option value="admin">Admin</option>
       </select>
     </div>
+    <div class="admin-form-row">
+      <div class="form-group">
+        <label for="cu-state">State</label>
+        <select id="cu-state">
+          <option value="">—</option>
+          <option value="NSW">NSW</option>
+          <option value="VIC">VIC</option>
+          <option value="QLD">QLD</option>
+          <option value="SA">SA</option>
+          <option value="WA">WA</option>
+          <option value="TAS">TAS</option>
+          <option value="NT">NT</option>
+          <option value="ACT">ACT</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cu-region">Region Covered</label>
+        <input type="text" id="cu-region" placeholder="e.g. Greater Brisbane">
+      </div>
+    </div>
     <div class="form-group" style="display:flex; align-items:center; gap:8px;">
       <input type="checkbox" id="cu-approved" checked style="width:auto;">
       <label for="cu-approved" style="margin:0; text-transform:none; letter-spacing:0; font-weight:400; font-size:0.85rem;">Approve immediately (grants portal access right away)</label>
@@ -367,7 +387,7 @@ async function loadOrders() {
   }
 
   const resellerIds = [...new Set(allOrders.map(o => o.reseller_id))];
-  const { data: profiles } = await supabase.from('profiles').select('id, business_name, email').in('id', resellerIds);
+  const { data: profiles } = await supabase.from('profiles').select('id, business_name, email, state, region').in('id', resellerIds);
   (profiles || []).forEach(p => { allProfiles[p.id] = p; });
 
   panel.innerHTML = allOrders.map(o => {
@@ -403,7 +423,7 @@ async function selectOrder(orderId) {
 
   detail.innerHTML = `
     <h2 style="color:var(--forest); font-size:1.1rem; margin-bottom:0.25rem;">${escapeHtml(order.order_number || '—')} <span style="font-weight:400; color:var(--grey-400);">·</span> PO ${escapeHtml(order.po_number)}</h2>
-    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:0.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')} ${order.reseller_tier ? '<span class="badge badge-dark" style="margin-left:6px;">Tier ' + order.reseller_tier + ' order</span>' : ''}</p>
+    <p style="font-size:0.82rem; color:var(--grey-600); margin-bottom:0.5rem;">${escapeHtml(biz?.business_name || '')} — ${escapeHtml(biz?.email || '')} ${order.reseller_tier ? '<span class="badge badge-dark" style="margin-left:6px;">Tier ' + order.reseller_tier + ' order</span>' : ''} ${biz?.state ? '<span class="badge badge-dark" style="margin-left:6px;">' + escapeHtml(biz.state) + (biz.region ? ' — ' + escapeHtml(biz.region) : '') + '</span>' : ''}</p>
     <p style="font-size:0.78rem; color:var(--grey-400); margin-bottom:1.5rem;">Submitted ${formatAEST(order.created_at)}${order.updated_at && order.updated_at !== order.created_at ? ' · Last updated ' + formatAEST(order.updated_at) : ''}</p>
 
     <table class="detail-items-table">
@@ -528,7 +548,7 @@ async function loadApprovals() {
   list.innerHTML = `
     <div class="admin-table-wrap">
       <table class="admin-table">
-        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Tier</th><th>Approved</th><th></th></tr></thead>
+        <thead><tr><th>Email</th><th>Business Name</th><th>Role</th><th>Tier</th><th>State</th><th>Region</th><th>Approved</th><th></th></tr></thead>
         <tbody>
           ${allResellers.map(p => `
             <tr data-id="${p.id}">
@@ -548,6 +568,20 @@ async function loadApprovals() {
                   <option value="3" ${p.tier === 3 ? 'selected' : ''}>Tier 3</option>
                 </select>
               </td>
+              <td>
+                <select class="rs-state">
+                  <option value="" ${!p.state ? 'selected' : ''}>—</option>
+                  <option value="NSW" ${p.state === 'NSW' ? 'selected' : ''}>NSW</option>
+                  <option value="VIC" ${p.state === 'VIC' ? 'selected' : ''}>VIC</option>
+                  <option value="QLD" ${p.state === 'QLD' ? 'selected' : ''}>QLD</option>
+                  <option value="SA" ${p.state === 'SA' ? 'selected' : ''}>SA</option>
+                  <option value="WA" ${p.state === 'WA' ? 'selected' : ''}>WA</option>
+                  <option value="TAS" ${p.state === 'TAS' ? 'selected' : ''}>TAS</option>
+                  <option value="NT" ${p.state === 'NT' ? 'selected' : ''}>NT</option>
+                  <option value="ACT" ${p.state === 'ACT' ? 'selected' : ''}>ACT</option>
+                </select>
+              </td>
+              <td><input type="text" class="rs-region" value="${escapeHtml(p.region || '')}" placeholder="Region covered"></td>
               <td style="text-align:center;"><input type="checkbox" class="rs-approved" ${p.approved ? 'checked' : ''} style="width:auto;"></td>
               <td><button class="btn btn-primary btn-sm rs-save-btn">Save</button></td>
             </tr>`).join('')}
@@ -562,11 +596,13 @@ async function loadApprovals() {
       const business_name = row.querySelector('.rs-business').value.trim() || null;
       const role = row.querySelector('.rs-role').value;
       const tier = Number(row.querySelector('.rs-tier').value);
+      const state = row.querySelector('.rs-state').value || null;
+      const region = row.querySelector('.rs-region').value.trim() || null;
       const approved = row.querySelector('.rs-approved').checked;
 
       btn.disabled = true;
       btn.textContent = 'Saving…';
-      const { error } = await supabase.from('profiles').update({ business_name, role, tier, approved }).eq('id', id);
+      const { error } = await supabase.from('profiles').update({ business_name, role, tier, state, region, approved }).eq('id', id);
       btn.disabled = false;
       btn.textContent = 'Save';
 
@@ -659,6 +695,8 @@ document.getElementById('create-user-btn').addEventListener('click', () => {
   document.getElementById('cu-business').value = '';
   document.getElementById('cu-password').value = '';
   document.getElementById('cu-role').value = 'reseller';
+  document.getElementById('cu-state').value = '';
+  document.getElementById('cu-region').value = '';
   document.getElementById('cu-approved').checked = true;
   createUserModal.classList.add('open');
 });
@@ -669,6 +707,8 @@ document.getElementById('cu-submit-btn').addEventListener('click', async () => {
   const business_name = document.getElementById('cu-business').value.trim() || null;
   const password = document.getElementById('cu-password').value;
   const role = document.getElementById('cu-role').value;
+  const state = document.getElementById('cu-state').value || null;
+  const region = document.getElementById('cu-region').value.trim() || null;
   const approved = document.getElementById('cu-approved').checked;
 
   createUserErr.style.display = 'none';
@@ -681,7 +721,7 @@ document.getElementById('cu-submit-btn').addEventListener('click', async () => {
 
   try {
     const { data, error } = await supabase.functions.invoke('admin-create-user', {
-      body: { email, password, business_name, role, approved }
+      body: { email, password, business_name, role, approved, state, region }
     });
     if (error) throw error;
     showToast('Account created for ' + email, 'success');

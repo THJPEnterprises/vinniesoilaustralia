@@ -187,6 +187,21 @@ Adds three wholesale tiers, each with its own margin, order minimum, and shippin
 4. Resellers see their current tier on the Dashboard (badge + link to a full tier comparison), the order form (tier pricing applied automatically, order minimum enforced per their tier, free shipping shown if their tier includes it), and a dedicated `pages/portal-tiers.html` page explaining all three tiers with their own highlighted.
 5. The old single "Overall Order Minimum" setting (`order_settings` table, section 10 above) is superseded by each tier's own minimum — you can leave `order_settings` in place, it's just no longer read by the order form.
 
+## 12. Reseller state & region coverage
+
+Adds a State (dropdown of NSW/VIC/QLD/SA/WA/TAS/NT/ACT) and a free-text Region field to each reseller's account, so you can see and manage which part of the country a reseller covers.
+
+1. Run `schema-reseller-region.sql` in SQL Editor (after `schema-reseller-tiers.sql`). Adds `state` and `region` columns to `profiles`.
+2. Redeploy the `admin-create-user` Edge Function (it now accepts and saves state/region on account creation):
+   ```bash
+   supabase functions deploy admin-create-user
+   ```
+3. **Admin → Resellers tab**: State and Region columns are now editable inline for every existing reseller, alongside role/tier/approval.
+4. **Admin → Resellers → + Create New User**: set State and Region when creating a brand-new account.
+5. A reseller's state/region (if set) now shows in the Orders tab order detail view, next to their business name — handy context when confirming shipping.
+
+This is admin-managed data only — resellers don't see or edit their own state/region in the portal.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
