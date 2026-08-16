@@ -228,6 +228,15 @@ Run `schema-admin-tier-pricing-view.sql` in SQL Editor (after `schema-reseller-t
 
 This view is restricted to admin accounts: non-admin authenticated users get zero rows back even though the grant technically allows SELECT, and there's no access at all for anon/public. It's the deliberate opposite of the `public_pricing` view (that one is intentionally public-safe; this one is not).
 
+## 16. Sized products (T-shirts / apparel)
+
+Lets a product (like a T-shirt) be ordered with a size breakdown — a reseller can order, say, 5 Medium and 3 Large in the same order, and each size shows up as its own line for you and in Zoho.
+
+1. Run `schema-product-sizes.sql` in SQL Editor (after `schema-orders.sql`). Adds `has_sizes` and `available_sizes` to `wholesale_prices`, and a `size` column to `order_items`. Doesn't touch existing liquid products — `has_sizes` defaults to false and they order exactly as before.
+2. **Admin → Products & Pricing tab**: tick "Has Sizes?" for a product (e.g. your T-shirt SKU) and enter its sizes comma-separated in the new "Sizes" field, e.g. `S,M,L,XL,XXL`.
+3. On the reseller order form, a sized product automatically expands into one row per size (e.g. "Vinnie's Oil T-Shirt — Size M") — the reseller enters a quantity for each size they want, same as any other product, and the overall order minimum still counts every unit across every size and product.
+4. Order confirmations, "My Orders", and the admin Orders tab all show the size next to the product name on each line. If you sync an order to Zoho, the size is included in the line item name/description too.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.

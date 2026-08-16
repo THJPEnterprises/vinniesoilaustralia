@@ -199,7 +199,7 @@ async function loadOrders() {
         <table class="order-items-table">
           <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
           <tbody>
-            ${items.map(i => `<tr><td>${escapeHtml(i.product_name)}</td><td>${i.qty}</td><td>$${Number(i.unit_price_aud).toFixed(2)}</td><td>$${Number(i.line_total_aud).toFixed(2)}</td></tr>`).join('')}
+            ${items.map(i => `<tr><td>${escapeHtml(i.product_name)}${i.size ? ' <span style="color:var(--grey-400); font-weight:400;">(' + escapeHtml(i.size) + ')</span>' : ''}</td><td>${i.qty}</td><td>$${Number(i.unit_price_aud).toFixed(2)}</td><td>$${Number(i.line_total_aud).toFixed(2)}</td></tr>`).join('')}
           </tbody>
         </table>
         <div class="order-totals">

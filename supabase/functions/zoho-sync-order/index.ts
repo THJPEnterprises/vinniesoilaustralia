@@ -116,7 +116,8 @@ Deno.serve(async (req) => {
 
     const zohoLineItems = items.map((i: any) => ({
       item_id: zohoItemBySku[i.sku],
-      name: i.product_name,
+      name: i.product_name + (i.size ? " — Size " + i.size : ""),
+      description: i.size ? "Size: " + i.size : undefined,
       rate: Number(i.unit_price_aud),
       quantity: i.qty,
     }));

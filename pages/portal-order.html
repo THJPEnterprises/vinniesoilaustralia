@@ -178,6 +178,7 @@ function showToast(msg, type) {
 
 let currentUserId = null;
 let products = [];
+let lineItems = [];
 let minOrderQty = 1;
 let currentTier = 1;
 let tierDiscountPct = 0;
@@ -242,6 +243,10 @@ function priceFor(p) {
   return Number(p.wholesale_price_aud ?? 0);
 }
 
+function lineKey(sku, size) {
+  return sku + '::' + (size || '');
+}
+
 async function loadProducts() {
   const body = document.getElementById('order-table-body');
   const { data, error } = await supabase
@@ -255,15 +260,27 @@ async function loadProducts() {
   }
 
   products = data;
-  body.innerHTML = products.map(p => `
-    <tr data-sku="${p.sku}">
-      <td>${p.product_name}</td>
-      <td>${p.size ?? '—'}</td>
-      <td>$${priceFor(p).toFixed(2)}</td>
+  lineItems = [];
+  products.forEach(p => {
+    const price = priceFor(p);
+    if (p.has_sizes && p.available_sizes) {
+      p.available_sizes.split(',').map(s => s.trim()).filter(Boolean).forEach(sz => {
+        lineItems.push({ sku: p.sku, size: sz, productName: p.product_name, displayName: p.product_name + ' — Size ' + sz, sizeLabel: p.size, price });
+      });
+    } else {
+      lineItems.push({ sku: p.sku, size: null, productName: p.product_name, displayName: p.product_name, sizeLabel: p.size, price });
+    }
+  });
+
+  body.innerHTML = lineItems.map(li => `
+    <tr data-key="${lineKey(li.sku, li.size)}">
+      <td>${li.displayName}</td>
+      <td>${li.sizeLabel ?? '—'}</td>
+      <td>$${li.price.toFixed(2)}</td>
       <td>
-        <input type="number" min="0" step="1" value="0" class="qty-input" data-sku="${p.sku}">
+        <input type="number" min="0" step="1" value="0" class="qty-input" data-key="${lineKey(li.sku, li.size)}">
       </td>
-      <td class="line-total" data-sku-total="${p.sku}">$0.00</td>
+      <td class="line-total" data-key-total="${lineKey(li.sku, li.size)}">$0.00</td>
     </tr>`).join('');
 
   document.querySelectorAll('.qty-input').forEach(input => {
@@ -276,12 +293,13 @@ function recalculate() {
   let subtotal = 0;
   let totalQty = 0;
 
-  products.forEach(p => {
-    const input = document.querySelector('.qty-input[data-sku="' + cssEscape(p.sku) + '"]');
+  lineItems.forEach(li => {
+    const key = lineKey(li.sku, li.size);
+    const input = document.querySelector('.qty-input[data-key="' + cssEscape(key) + '"]');
     if (!input) return;
     const qty = Math.max(0, parseInt(input.value, 10) || 0);
-    const totalEl = document.querySelector('[data-sku-total="' + cssEscape(p.sku) + '"]');
-    const lineTotal = qty * priceFor(p);
+    const totalEl = document.querySelector('[data-key-total="' + cssEscape(key) + '"]');
+    const lineTotal = qty * li.price;
 
     totalQty += qty;
     if (qty > 0) subtotal += lineTotal;
@@ -323,16 +341,18 @@ document.getElementById('submit-order-btn').addEventListener('click', async () =
   if (!hasAnyItem) { showError('Add a quantity for at least one product.'); return; }
   if (!meetsMinimum) { showError('Your order totals ' + totalQty + ' units — the minimum order is ' + minOrderQty + ' units across all products.'); return; }
 
-  const items = products
-    .map(p => {
-      const input = document.querySelector('.qty-input[data-sku="' + cssEscape(p.sku) + '"]');
+  const items = lineItems
+    .map(li => {
+      const key = lineKey(li.sku, li.size);
+      const input = document.querySelector('.qty-input[data-key="' + cssEscape(key) + '"]');
       const qty = Math.max(0, parseInt(input.value, 10) || 0);
       return qty > 0 ? {
-        sku: p.sku,
-        product_name: p.product_name,
-        unit_price_aud: priceFor(p),
+        sku: li.sku,
+        product_name: li.productName,
+        size: li.size,
+        unit_price_aud: li.price,
         qty,
-        line_total_aud: qty * priceFor(p)
+        line_total_aud: qty * li.price
       } : null;
     })
     .filter(Boolean);
