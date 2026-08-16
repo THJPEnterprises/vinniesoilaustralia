@@ -208,7 +208,7 @@ async function loadOrders() {
           </tbody>
         </table>
         <div class="order-totals">
-          <div class="order-totals-row"><span>Subtotal</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
+          <div class="order-totals-row"><span>Subtotal (ex GST)</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
           <div class="order-totals-row"><span>GST</span><span>$${Number(order.gst_aud).toFixed(2)}</span></div>
           <div class="order-totals-row"><span>Shipping</span><span>${shippingText}</span></div>
           <div class="order-totals-row total"><span>Total</span><span>$${grandTotal.toFixed(2)}${order.shipping_aud == null ? ' + shipping' : ''}</span></div>

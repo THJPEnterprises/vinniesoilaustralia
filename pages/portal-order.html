@@ -113,10 +113,10 @@ body { background: var(--offwhite); }
 
       <div class="order-summary">
         <div class="order-summary-box">
-          <div class="order-summary-row"><span>Subtotal</span><span id="sum-subtotal">$0.00</span></div>
-          <div class="order-summary-row"><span>GST (10%)</span><span id="sum-gst">$0.00</span></div>
+          <div class="order-summary-row"><span>Subtotal (ex GST)</span><span id="sum-subtotal">$0.00</span></div>
+          <div class="order-summary-row"><span>GST (included)</span><span id="sum-gst">$0.00</span></div>
           <div class="order-summary-row"><span>Shipping<span class="label-note" id="shipping-note">Confirmed by our team after submission</span></span><span id="shipping-value">TBC</span></div>
-          <div class="order-summary-row total"><span>Total (excl. shipping)</span><span id="sum-total">$0.00</span></div>
+          <div class="order-summary-row total"><span>Total (incl. GST, excl. shipping)</span><span id="sum-total">$0.00</span></div>
         </div>
       </div>
     </div>
@@ -295,7 +295,10 @@ async function loadProducts() {
 }
 
 function recalculate() {
-  let subtotal = 0;
+  // Product prices (RRP/wholesale) are GST-inclusive throughout the site,
+  // so the sum of line totals below is already the GST-inclusive amount —
+  // GST is extracted from it for display, not added on top.
+  let grossSubtotal = 0;
   let totalQty = 0;
 
   lineItems.forEach(li => {
@@ -307,12 +310,13 @@ function recalculate() {
     const lineTotal = qty * li.price;
 
     totalQty += qty;
-    if (qty > 0) subtotal += lineTotal;
+    if (qty > 0) grossSubtotal += lineTotal;
     totalEl.textContent = '$' + lineTotal.toFixed(2);
   });
 
-  const gst = subtotal * 0.10;
-  const total = subtotal + gst;
+  const gst = grossSubtotal / 11;
+  const subtotal = grossSubtotal - gst; // ex-GST subtotal, for display/records
+  const total = grossSubtotal; // GST-inclusive total, excl. shipping
   const hasAnyItem = totalQty > 0;
   const meetsMinimum = totalQty >= minOrderQty;
 

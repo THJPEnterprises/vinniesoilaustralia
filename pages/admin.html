@@ -555,7 +555,7 @@ async function selectOrder(orderId) {
       </tbody>
     </table>
 
-    <div class="detail-row"><span>Subtotal</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
+    <div class="detail-row"><span>Subtotal (ex GST)</span><span>$${Number(order.subtotal_aud).toFixed(2)}</span></div>
     <div class="detail-row"><span>GST</span><span>$${Number(order.gst_aud).toFixed(2)}</span></div>
     <div class="detail-row" style="font-weight:700; color:var(--forest); border-top:1px solid var(--grey-200); padding-top:0.5rem; margin-top:0.25rem;"><span>Total</span><span>$${grandTotal.toFixed(2)}</span></div>
 
