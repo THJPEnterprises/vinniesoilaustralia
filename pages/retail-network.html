@@ -118,15 +118,8 @@
 
     <div class="retailer-grid" id="retailer-grid">
 
-      <!-- Arborean — Platinum tier reseller, Preferred Partner -->
-      <div class="retailer-card preferred-partner" data-state="nsw">
-        <div class="preferred-partner-badge">★ Preferred Partner</div>
-        <div class="retailer-logo-placeholder"><span>Arborean</span></div>
-        <span class="state-badge">NSW</span>
-        <h3>Arborean</h3>
-        <p>Specialist woodworking and timber products retailer. Full range of Vinnie's Oil products and expert application advice.</p>
-        <a href="http://arborean.com.au" target="_blank" rel="noopener" class="retailer-link">arborean.com.au <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 9L9 1M9 1H5M9 1v4"/></svg></a>
-      </div>
+      <!-- Real retailer cards are inserted here by JS from the retailers table -->
+      <div id="retailer-cards-loading" style="grid-column:1/-1; color:var(--grey-400); font-size:0.85rem;">Loading retailers…</div>
 
       <!-- Placeholder retailers to show network is growing -->
       <div class="retailer-card coming-soon" data-state="vic">
@@ -317,8 +310,62 @@
 </div><div class="footer-bottom"><p>© 2026 Vinnie's Oil Australia. Distributed by THJP Enterprises Pty Ltd.</p></div></div></footer>
 
 <button id="back-top" aria-label="Back to top"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 12V4M4 8l4-4 4 4"/></svg></button>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/portal-config.js"></script>
 <script src="../js/shared.js"></script>
 <script>
+(function () {
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return;
+  const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  function hostnameFor(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return url; }
+  }
+
+  async function loadRetailers() {
+    const loading = document.getElementById('retailer-cards-loading');
+    const grid = document.getElementById('retailer-grid');
+    const { data, error } = await supabase
+      .from('retailers')
+      .select('*')
+      .eq('active', true)
+      .order('sort_order', { ascending: true })
+      .order('business_name', { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      if (loading) loading.remove();
+      return;
+    }
+
+    const cardsHtml = data.map(r => {
+      const stateLabel = r.state === 'online' ? 'Online' : r.state.toUpperCase();
+      const linkHtml = r.website_url
+        ? `<a href="${escapeHtml(r.website_url)}" target="_blank" rel="noopener" class="retailer-link">${escapeHtml(hostnameFor(r.website_url))} <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 9L9 1M9 1H5M9 1v4"/></svg></a>`
+        : '';
+      return `
+      <div class="retailer-card ${r.preferred_partner ? 'preferred-partner' : ''}" data-state="${escapeHtml(r.state)}">
+        ${r.preferred_partner ? '<div class="preferred-partner-badge">★ Preferred Partner</div>' : ''}
+        <div class="retailer-logo-placeholder"><span>${escapeHtml(r.business_name)}</span></div>
+        <span class="state-badge">${escapeHtml(stateLabel)}</span>
+        <h3>${escapeHtml(r.business_name)}</h3>
+        <p>${escapeHtml(r.description || '')}</p>
+        ${linkHtml}
+      </div>`;
+    }).join('');
+
+    if (loading) loading.insertAdjacentHTML('afterend', cardsHtml);
+    if (loading) loading.remove();
+  }
+
+  loadRetailers();
+})();
+
 function filterState(state, btn) {
   document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');

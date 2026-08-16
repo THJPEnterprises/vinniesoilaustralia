@@ -101,6 +101,7 @@ body { background: var(--offwhite); }
       <button class="tab-btn" data-tab="pricing">Products &amp; Pricing</button>
       <button class="tab-btn" data-tab="tiers">Reseller Tiers</button>
       <button class="tab-btn" data-tab="resources">Dealer Resources</button>
+      <button class="tab-btn" data-tab="retailers">Retail Network</button>
       <button class="tab-btn" data-tab="resellers">Resellers <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
     </div>
 
@@ -159,6 +160,19 @@ body { background: var(--offwhite); }
         <table class="admin-table" id="resources-table">
           <thead><tr><th>Title</th><th>Description</th><th>Category</th><th>File</th><th></th></tr></thead>
           <tbody id="resources-table-body"><tr><td colspan="5" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="retailers">
+      <div class="section-toolbar">
+        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">Real stockist listings shown on the public Retail Network page. The "Coming Soon" placeholders per state and the Online Retailers card stay hardcoded on that page — only real retailers below are database-managed. Tick <strong>Preferred Partner</strong> to show a gold "Preferred Partner" badge on their card; untick <strong>Active</strong> to hide a listing without deleting it.</p>
+        <button id="add-retailer-btn" class="btn btn-primary btn-sm">+ Add Retailer</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="retailers-table">
+          <thead><tr><th>Business Name</th><th>State</th><th>Website</th><th>Description</th><th>Preferred Partner</th><th>Active</th><th></th></tr></thead>
+          <tbody id="retailers-table-body"><tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -319,6 +333,7 @@ async function init() {
   loadMinOrderQty();
   loadTiers();
   loadResourcesAdmin();
+  loadRetailers();
 }
 
 async function loadMinOrderQty() {
@@ -488,6 +503,84 @@ document.getElementById('add-resource-btn').addEventListener('click', async () =
   if (error) { showToast('Failed to add resource: ' + error.message, 'error'); return; }
   showToast('Resource added — upload a file or paste a link below, then Save', 'success');
   loadResourcesAdmin();
+});
+
+const RETAILER_STATES = ['nsw', 'vic', 'qld', 'wa', 'sa', 'act', 'nt', 'online'];
+
+async function loadRetailers() {
+  const body = document.getElementById('retailers-table-body');
+  const { data, error } = await supabase.from('retailers').select('*').order('sort_order', { ascending: true }).order('business_name', { ascending: true });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="7" style="color:#a13a00; padding:1.25rem;">Unable to load retailers.</td></tr>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">No retailers yet — click "+ Add Retailer" to create one.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(r => `
+    <tr data-id="${r.id}">
+      <td><input type="text" class="rt-name" value="${escapeHtml(r.business_name)}"></td>
+      <td>
+        <select class="rt-state">
+          ${RETAILER_STATES.map(s => `<option value="${s}" ${r.state === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="text" class="rt-website" value="${escapeHtml(r.website_url || '')}" placeholder="https://…"></td>
+      <td><input type="text" class="rt-desc" value="${escapeHtml(r.description || '')}" style="min-width:220px;"></td>
+      <td style="text-align:center;"><input type="checkbox" class="rt-preferred" ${r.preferred_partner ? 'checked' : ''} style="width:auto;"></td>
+      <td style="text-align:center;"><input type="checkbox" class="rt-active" ${r.active ? 'checked' : ''} style="width:auto;"></td>
+      <td class="row-actions">
+        <button class="btn btn-primary btn-sm rt-save-btn">Save</button>
+        <button class="btn btn-outline btn-sm rt-delete-btn">Delete</button>
+      </td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.rt-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const payload = {
+        business_name: row.querySelector('.rt-name').value.trim(),
+        state: row.querySelector('.rt-state').value,
+        website_url: row.querySelector('.rt-website').value.trim() || null,
+        description: row.querySelector('.rt-desc').value.trim() || null,
+        preferred_partner: row.querySelector('.rt-preferred').checked,
+        active: row.querySelector('.rt-active').checked,
+        updated_at: new Date().toISOString()
+      };
+      if (!payload.business_name) { showToast('Business name is required', 'error'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      const { error } = await supabase.from('retailers').update(payload).eq('id', id);
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+      showToast('Retailer updated', 'success');
+    });
+  });
+
+  document.querySelectorAll('.rt-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this retailer listing? This cannot be undone — untick Active instead if you just want to hide it.')) return;
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const { error } = await supabase.from('retailers').delete().eq('id', id);
+      if (error) { showToast('Failed to delete: ' + error.message, 'error'); return; }
+      showToast('Retailer deleted', 'success');
+      loadRetailers();
+    });
+  });
+}
+
+document.getElementById('add-retailer-btn').addEventListener('click', async () => {
+  const { error } = await supabase.from('retailers').insert({ business_name: 'New Retailer', state: 'nsw' });
+  if (error) { showToast('Failed to add retailer: ' + error.message, 'error'); return; }
+  showToast('Retailer added — edit the details below', 'success');
+  loadRetailers();
 });
 
 async function loadOrders() {
