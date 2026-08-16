@@ -687,7 +687,8 @@ async function loadApprovals() {
                 <select class="rs-tier">
                   <option value="1" ${(p.tier || 1) === 1 ? 'selected' : ''}>Tier 1</option>
                   <option value="2" ${p.tier === 2 ? 'selected' : ''}>Tier 2</option>
-                  <option value="3" ${p.tier === 3 ? 'selected' : ''}>Tier 3</option>
+                  <option value="3" ${p.tier === 3 ? 'selected' : ''}>Tier 3 — Gold</option>
+                  <option value="4" ${p.tier === 4 ? 'selected' : ''}>Tier 4 — Platinum</option>
                 </select>
               </td>
               <td>

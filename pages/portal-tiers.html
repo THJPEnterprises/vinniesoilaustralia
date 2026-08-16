@@ -33,6 +33,7 @@ body { background: var(--offwhite); }
 .tier-card ul li { font-size: 0.85rem; color: var(--grey-800); padding: 0.4rem 0; padding-left: 1.4rem; position: relative; }
 .tier-card ul li::before { content: "✓"; position: absolute; left: 0; color: var(--moss); font-weight: 700; }
 .tier-card .tier-benefits { font-size: 0.82rem; color: var(--grey-600); margin-top: 1rem; line-height: 1.5; }
+.tier-card .platinum-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:linear-gradient(135deg,#d4af37,var(--gold,#E8A820)); color:#3d2b00; border-radius:100px; font-size:0.65rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.5rem; }
 </style>
 </head>
 <body>
@@ -145,16 +146,24 @@ async function loadTiers(currentTier) {
 
   grid.innerHTML = data.map(t => {
     const isCurrent = t.tier === currentTier;
+    // Benefits with multiple lines: first line is the description
+    // paragraph (as before), remaining lines become extra bullet perks.
+    const benefitLines = (t.benefits || '').split('\n').map(l => l.trim()).filter(Boolean);
+    const description = benefitLines[0] || '';
+    const extraPerks = benefitLines.slice(1);
+
     return `
       <div class="tier-card ${isCurrent ? 'current' : ''}">
         ${isCurrent ? '<div class="current-flag">Your Tier</div>' : ''}
+        ${t.label === 'Platinum' ? '<div class="platinum-badge">★ Preferred Partner Eligible</div>' : ''}
         <h3>${escapeHtml(t.label)}</h3>
         <div class="tier-pct">${Number(t.discount_pct)}% <span>margin off RRP</span></div>
         <ul>
           <li>Minimum order: ${t.min_order_qty} units (any mix of products)</li>
           <li>${t.free_shipping ? 'Free shipping on every order' : 'Shipping quoted per order'}</li>
+          ${extraPerks.map(perk => `<li>${escapeHtml(perk)}</li>`).join('')}
         </ul>
-        ${t.benefits ? `<div class="tier-benefits">${escapeHtml(t.benefits)}</div>` : ''}
+        ${description ? `<div class="tier-benefits">${escapeHtml(description)}</div>` : ''}
       </div>`;
   }).join('');
 }

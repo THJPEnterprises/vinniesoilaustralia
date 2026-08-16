@@ -32,6 +32,8 @@
 .form-group-dark input:focus, .form-group-dark select:focus, .form-group-dark textarea:focus { border-color: var(--gold); }
 .form-group-dark select option { background: var(--forest); color: #fff; }
 .online-retailer { border-left: 3px solid var(--sweden-blue); }
+.preferred-partner { border-color: var(--gold); box-shadow: 0 4px 20px rgba(232,168,32,0.15); }
+.preferred-partner-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; background: linear-gradient(135deg, #d4af37, var(--gold)); color: #3d2b00; border-radius: 100px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.6rem; }
 .coming-soon { border-left: 3px solid var(--grey-200); opacity: 0.6; }
 @media (max-width: 768px) { .retailer-grid { grid-template-columns: 1fr 1fr; } .apply-form-grid { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .retailer-grid { grid-template-columns: 1fr; } }
@@ -116,8 +118,9 @@
 
     <div class="retailer-grid" id="retailer-grid">
 
-      <!-- Arborean -->
-      <div class="retailer-card" data-state="nsw">
+      <!-- Arborean — Platinum tier reseller, Preferred Partner -->
+      <div class="retailer-card preferred-partner" data-state="nsw">
+        <div class="preferred-partner-badge">★ Preferred Partner</div>
         <div class="retailer-logo-placeholder"><span>Arborean</span></div>
         <span class="state-badge">NSW</span>
         <h3>Arborean</h3>

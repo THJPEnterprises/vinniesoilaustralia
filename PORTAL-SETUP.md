@@ -250,6 +250,16 @@ Every account — reseller and admin — must set up two-factor authentication v
    It reuses the same `SUPABASE_SERVICE_ROLE_KEY` secret already set for the other admin functions.
 4. **Lost device recovery**: if someone loses their phone/authenticator app, they can't get back in on their own (by design — that's the whole point of mandatory MFA). **Admin → Resellers tab** now has a **Reset MFA** button per account — clicking it clears their enrolled factor, and they're taken through the QR setup again from scratch on their next sign-in.
 
+## 18. Tier 3 renamed to Gold (45%), new Tier 4 Platinum (50%)
+
+Run `schema-tier-gold-platinum.sql` in SQL Editor (after `schema-reseller-tiers.sql`). Renames Tier 3 to "Gold" and drops its margin from 50% to 45%, and adds a new Tier 4 "Platinum" at 50% margin with a 100-unit per-order minimum.
+
+Platinum's real qualifying bar — a quarterly order volume of 50+ units — isn't something the system tracks automatically (tiers are still assigned manually in Admin → Resellers, same as every other tier), so it's spelled out in the tier's benefits text shown to resellers on the "Your Tier" comparison page rather than being a live gate on the order form. Review it manually each quarter when deciding who stays at Platinum.
+
+Platinum's extra perks (30-day account terms, priority dispatch, early access to new/limited product lines, a 2% quarterly volume rebate on paid orders, marketing posters/displays, and being featured as a "Preferred Partner") are listed on the tier comparison page — these are benefits you deliver manually (invoicing terms, dispatch priority, rebate payment, etc.), the portal doesn't automate any of them.
+
+**"Preferred Partner" badge**: added to `pages/retail-network.html` on Arborean's listing as a test — a small gold ribbon badge on their retailer card. Since the retail network page is static HTML (not admin-managed), adding/removing this badge for other stockists means editing that file directly — ask if you'd like this pulled into the admin UI instead once you have more than one Platinum-tier retailer to feature.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
