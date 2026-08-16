@@ -220,6 +220,14 @@ Adds a **Dealer Resources** tab to `/pages/admin.html` so SDS sheets, applicatio
 4. **+ Add Resource** creates a blank row — fill in the details and upload a file or paste a link, then Save.
 5. Deleting a resource removes the portal listing but does not delete the underlying file from Storage — clean up unused files from Storage → dealer-resources separately if needed.
 
+## 15. Admin-only tier pricing reference view
+
+The `wholesale_prices` table only ever stores one flat `wholesale_price_aud` figure (a legacy reference column) — actual Tier 1/2/3 prices are computed live in the browser from RRP × each tier's margin %, and never written back to the database. That's expected, but it means you can't just glance at Table Editor and see all 3 tiers' prices per product.
+
+Run `schema-admin-tier-pricing-view.sql` in SQL Editor (after `schema-reseller-tiers.sql`) to add a `tier_pricing_reference` view in Table Editor showing SKU, product name, RRP, and each tier's margin % + computed price side by side — for your own reference only.
+
+This view is restricted to admin accounts: non-admin authenticated users get zero rows back even though the grant technically allows SELECT, and there's no access at all for anon/public. It's the deliberate opposite of the `public_pricing` view (that one is intentionally public-safe; this one is not).
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.
