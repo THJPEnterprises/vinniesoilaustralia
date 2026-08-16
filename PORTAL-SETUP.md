@@ -210,6 +210,16 @@ Also enable **Leaked Password Protection**: Supabase dashboard → Authenticatio
 
 The "Security Definer View" warning on `public_pricing` and the various "Auth RLS Initialization Plan" / "Multiple Permissive Policies" notices are expected/low-priority — see the note in section 9 about `public_pricing` being intentional, and the RLS ones are performance suggestions only relevant at much higher traffic than this site sees.
 
+## 14. Admin-managed Dealer Resources
+
+Adds a **Dealer Resources** tab to `/pages/admin.html` so SDS sheets, application/maintenance guides, the marketing kit, and the product image gallery can all be managed without touching Table Editor or Storage directly.
+
+1. Run `schema-admin-resources.sql` in SQL Editor (after `schema-admin-extras.sql`) — grants admins insert/update/delete on the `resources` table and the `dealer-resources` Storage bucket (previously read-only for admins too, same as everyone else).
+2. **Admin → Dealer Resources tab**: edit title, description and category inline, and either upload a file directly (drag/select a file, it uploads to Storage automatically on Save) or paste an external URL (e.g. a Google Drive share link) into the file field instead — same dual-mode support the portal already had for reading resources.
+3. Category `product-images` routes an entry into the reseller Dashboard's image gallery; any other category (`sds`, `spec-sheet`, `marketing`, `general`) shows in the Dealer Resources list instead.
+4. **+ Add Resource** creates a blank row — fill in the details and upload a file or paste a link, then Save.
+5. Deleting a resource removes the portal listing but does not delete the underlying file from Storage — clean up unused files from Storage → dealer-resources separately if needed.
+
 ## 6. Security notes
 
 - Wholesale pricing and files are only ever fetched **after** Supabase confirms the session and `approved = true` — they're not sitting in the page source like a client-side password gate would be.

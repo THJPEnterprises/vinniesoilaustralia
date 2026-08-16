@@ -100,6 +100,7 @@ body { background: var(--offwhite); }
       <button class="tab-btn active" data-tab="orders">Orders</button>
       <button class="tab-btn" data-tab="pricing">Products &amp; Pricing</button>
       <button class="tab-btn" data-tab="tiers">Reseller Tiers</button>
+      <button class="tab-btn" data-tab="resources">Dealer Resources</button>
       <button class="tab-btn" data-tab="resellers">Resellers <span id="approval-count" class="badge badge-amber" style="display:none;"></span></button>
     </div>
 
@@ -145,6 +146,19 @@ body { background: var(--offwhite); }
         <table class="admin-table" id="tiers-table">
           <thead><tr><th>Tier</th><th>Label</th><th>Margin %</th><th>Order Min (units)</th><th>Free Shipping</th><th>Benefits Text</th><th></th></tr></thead>
           <tbody id="tiers-table-body"><tr><td colspan="7" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="resources">
+      <div class="section-toolbar">
+        <p style="color:var(--grey-600); font-size:0.85rem; margin:0;">SDS sheets, guides, marketing kit and the product image gallery shown on the reseller Dashboard. Upload a file directly, or paste an external link (e.g. a Google Drive share URL) instead. Category <code>product-images</code> routes into the image gallery; anything else shows in the resource list.</p>
+        <button id="add-resource-btn" class="btn btn-primary btn-sm">+ Add Resource</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="resources-table">
+          <thead><tr><th>Title</th><th>Description</th><th>Category</th><th>File</th><th></th></tr></thead>
+          <tbody id="resources-table-body"><tr><td colspan="5" style="color:var(--grey-400); padding:1.25rem;">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -299,6 +313,7 @@ async function init() {
   loadPricing();
   loadMinOrderQty();
   loadTiers();
+  loadResourcesAdmin();
 }
 
 async function loadMinOrderQty() {
@@ -367,6 +382,108 @@ async function loadTiers() {
     });
   });
 }
+
+const RESOURCE_CATEGORIES = ['general', 'sds', 'spec-sheet', 'marketing', 'product-images'];
+
+async function loadResourcesAdmin() {
+  const body = document.getElementById('resources-table-body');
+  const { data, error } = await supabase.from('resources').select('*').order('category', { ascending: true }).order('title', { ascending: true });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="5" style="color:#a13a00; padding:1.25rem;">Unable to load resources.</td></tr>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="color:var(--grey-400); padding:1.25rem;">No resources yet — click "+ Add Resource" to create one.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(r => `
+    <tr data-id="${r.id}">
+      <td><input type="text" class="res-title" value="${escapeHtml(r.title)}"></td>
+      <td><input type="text" class="res-desc" value="${escapeHtml(r.description || '')}"></td>
+      <td>
+        <select class="res-category">
+          ${RESOURCE_CATEGORIES.map(c => `<option value="${c}" ${r.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <input type="text" class="res-filepath" value="${escapeHtml(r.file_path)}" placeholder="Storage path or external URL" style="margin-bottom:6px;">
+        <input type="file" class="res-upload" style="font-size:0.72rem;">
+      </td>
+      <td class="row-actions">
+        <button class="btn btn-primary btn-sm res-save-btn">Save</button>
+        <button class="btn btn-outline btn-sm res-delete-btn">Delete</button>
+      </td>
+    </tr>`).join('');
+
+  document.querySelectorAll('.res-save-btn').forEach(btn => {
+    btn.addEventListener('click', () => saveResource(btn));
+  });
+  document.querySelectorAll('.res-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this resource? This removes it from the portal (the uploaded file itself is left in Storage). This cannot be undone.')) return;
+      const row = btn.closest('tr');
+      const id = row.dataset.id;
+      const { error } = await supabase.from('resources').delete().eq('id', id);
+      if (error) { showToast('Failed to delete: ' + error.message, 'error'); return; }
+      showToast('Resource deleted', 'success');
+      loadResourcesAdmin();
+    });
+  });
+}
+
+async function saveResource(btn) {
+  const row = btn.closest('tr');
+  const id = row.dataset.id;
+  const title = row.querySelector('.res-title').value.trim();
+  const description = row.querySelector('.res-desc').value.trim() || null;
+  const category = row.querySelector('.res-category').value;
+  const fileInput = row.querySelector('.res-upload');
+  let file_path = row.querySelector('.res-filepath').value.trim();
+
+  if (!title) { showToast('Title is required', 'error'); return; }
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+
+  if (fileInput.files && fileInput.files[0]) {
+    btn.textContent = 'Uploading…';
+    const file = fileInput.files[0];
+    const path = category + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const { error: uploadErr } = await supabase.storage.from('dealer-resources').upload(path, file, { upsert: true });
+    if (uploadErr) {
+      showToast('File upload failed: ' + uploadErr.message, 'error');
+      btn.disabled = false;
+      btn.textContent = originalText;
+      return;
+    }
+    file_path = path;
+  }
+
+  if (!file_path) { showToast('Upload a file or enter a storage path / external URL', 'error'); btn.disabled = false; btn.textContent = originalText; return; }
+
+  btn.textContent = 'Saving…';
+  const { error } = await supabase.from('resources').update({
+    title, description, category, file_path, updated_at: new Date().toISOString()
+  }).eq('id', id);
+
+  btn.disabled = false;
+  btn.textContent = originalText;
+
+  if (error) { showToast('Failed to save: ' + error.message, 'error'); return; }
+  showToast('Resource updated', 'success');
+  loadResourcesAdmin();
+}
+
+document.getElementById('add-resource-btn').addEventListener('click', async () => {
+  const { error } = await supabase.from('resources').insert({
+    title: 'New Resource', category: 'general', file_path: 'REPLACE-ME'
+  });
+  if (error) { showToast('Failed to add resource: ' + error.message, 'error'); return; }
+  showToast('Resource added — upload a file or paste a link below, then Save', 'success');
+  loadResourcesAdmin();
+});
 
 async function loadOrders() {
   const panel = document.getElementById('orders-list-panel');
