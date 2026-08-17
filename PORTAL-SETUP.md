@@ -131,10 +131,12 @@ The service role key is in Supabase → Project Settings → API — this is the
 
 ### 8c. Link resellers and products to Zoho
 
-Run `schema-zoho.sql` in SQL Editor first (adds two columns). Then, before syncing will work for a given order:
+Run `schema-zoho.sql` in SQL Editor first (adds two columns). Then, before syncing will work for a given order, link each reseller and product to its matching Zoho record:
 
-- **Per reseller:** `update public.profiles set zoho_contact_id = '...' where email = '...';` — find the Contact ID in Zoho Inventory → Contacts.
-- **Per product:** `update public.wholesale_prices set zoho_item_id = '...' where sku = '...';` — find the Item ID in Zoho Inventory → Items.
+- **Per reseller:** Admin → Resellers tab → **Zoho Contact ID** column. Find the Contact ID in Zoho Inventory → Contacts.
+- **Per product:** Admin → Products & Pricing tab → **Zoho Item ID** column. Find the Item ID in Zoho Inventory → Items.
+
+No SQL needed for either — edit the field and click Save, same as any other row. (You can still set these directly in Table Editor if you prefer: `update public.profiles set zoho_contact_id = '...' where email = '...';` / `update public.wholesale_prices set zoho_item_id = '...' where sku = '...';`)
 
 If either is missing when an admin clicks "Sync to Zoho," the function fails with a clear message telling you exactly what's missing rather than partially syncing.
 
