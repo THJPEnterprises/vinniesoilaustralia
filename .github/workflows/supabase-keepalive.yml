@@ -1,0 +1,67 @@
+# Keeps the Supabase Free Plan project awake.
+# Supabase pauses free projects after 7 days with no database activity.
+# This workflow runs twice a week and makes a tiny read query against the
+# database through the REST API, which counts as activity.
+#
+# No setup needed: it reads the project URL and anon (public) key from
+# js/portal-config.js. To override, add repo secrets SUPABASE_URL and/or
+# SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions).
+
+name: Supabase keep-alive
+
+on:
+  schedule:
+    # Sunday & Wednesday 21:17 UTC = Monday & Thursday ~8am Sydney
+    - cron: '17 21 * * 0,3'
+  workflow_dispatch: {}   # lets you run it manually from the Actions tab
+
+permissions:
+  contents: write   # only used for the occasional heartbeat commit below
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping Supabase database
+        env:
+          SECRET_URL: ${{ secrets.SUPABASE_URL }}
+          SECRET_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          URL="${SECRET_URL:-$(grep -oP "SUPABASE_URL\s*=\s*'\K[^']+" js/portal-config.js)}"
+          KEY="${SECRET_KEY:-$(grep -oP "SUPABASE_ANON_KEY\s*=\s*'\K[^']+" js/portal-config.js)}"
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::error::Could not find Supabase URL/key"; exit 1
+          fi
+          echo "Pinging $URL"
+          # Small read query on the resources table — returns [] if RLS hides
+          # rows, but still runs a real Postgres query.
+          for i in 1 2 3; do
+            CODE=$(curl -s -o /tmp/body.txt -w '%{http_code}' \
+              "$URL/rest/v1/resources?select=id&limit=1" \
+              -H "apikey: $KEY")
+            echo "Attempt $i → HTTP $CODE"; cat /tmp/body.txt; echo
+            if [ "$CODE" -ge 200 ] && [ "$CODE" -lt 300 ]; then exit 0; fi
+            sleep 20
+          done
+          echo "::error::Supabase ping failed (HTTP $CODE). The project may already be paused — restore it from the Supabase dashboard."
+          exit 1
+
+      # GitHub switches off scheduled workflows in repos with no commits for
+      # 60 days. If the repo has been quiet for 45+ days, push a tiny
+      # heartbeat commit so this workflow keeps running.
+      - name: Heartbeat commit if repo is idle
+        run: |
+          git fetch --unshallow --quiet || true
+          LAST=$(git log -1 --format=%ct)
+          AGE_DAYS=$(( ( $(date +%s) - LAST ) / 86400 ))
+          echo "Last commit was $AGE_DAYS days ago"
+          if [ "$AGE_DAYS" -ge 45 ]; then
+            date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/keepalive-heartbeat.txt
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/keepalive-heartbeat.txt
+            git commit -m "chore: keep-alive heartbeat [skip ci]"
+            git push
+          fi
